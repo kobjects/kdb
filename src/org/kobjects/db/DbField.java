@@ -58,7 +58,7 @@ public class DbField {
      * are stored like BINARY fields, but are handled differently in the user
      * interface.
      */
-    public static final int GRAPHICS = 3001;
+    public static final int GRAPHICS = 3001; // 3xxx not used in java sql
     
     public static final int DOUBLE = 8; // java.sql.types.DOUBLE
 

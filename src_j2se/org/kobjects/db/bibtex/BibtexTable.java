@@ -18,11 +18,10 @@ public class BibtexTable extends RamTable implements Runnable {
 	protected String filename;
 	protected String documentDir;
 
-	int fileIndex = -1;
-	int keyIndex = -1;
+	int fileFields;
+	int keyField = -1;
 
 	Hashtable keyTable = new Hashtable();
-
 
 	static final String[] DEFAULT_FIELDS =
 		{
@@ -83,50 +82,6 @@ public class BibtexTable extends RamTable implements Runnable {
 		return buf.toString();
 	}
 
-	protected synchronized void update(Reader reader, Writer info)
-		throws IOException, DbException {
-		BibtexParser parser = new BibtexParser(new BufferedReader(reader));
-
-		int fields = getFieldCount();
-		int lastInc = 0;
-
-		while (true) {
-			Hashtable entry = parser.nextEntry();
-			Object[] dst = new Object[fields];
-
-			if (entry == null)
-				break;
-
-			if (info != null) {
-				info.write ("adding/updating entry/");
-				info.flush();				
-			}
-
-			for (Enumeration e = entry.keys(); e.hasMoreElements();) {
-				String name = (String) e.nextElement();
-
-				int i = findField(name);
-
-				if (i <= 0 && info != null) {
-					info.write("- ignoring unknown field: " + name);
-				}
-				else {
-					if (i <= 0) {
-						addField(name, DbField.STRING).getNumber();
-						fields++;
-						Object[] tmp = new Object[fields];
-						System.arraycopy(dst, 0, tmp, 0, dst.length);
-						dst = tmp;
-						lastInc = records.size();
-					}
-					dst[i - 1] = entry.get(name);
-				}
-			}
-			records.addElement(dst);
-		}
-
-		reader.close();
-	}
 
 	public void connect(String connector) throws DbException {
 		filename = connector.substring(connector.indexOf(':') + 1);
@@ -155,14 +110,43 @@ public class BibtexTable extends RamTable implements Runnable {
 		}
 
 		setIdField(findField("id"));
-		keyIndex = findField("key");
+		keyField = findField("key");
 
-		fileIndex = getFieldCount();
+		fileFields = getFieldCount();
 		addField("pdfFile", DbField.BINARY);
 
 		if (exists) {
 			try {
-				update(new FileReader(file), null);
+				Reader reader = new BufferedReader(new FileReader(file));
+				BibtexParser parser = new BibtexParser(reader);
+
+				int fields = getFieldCount();
+				int lastInc = 0;
+
+				while (true) {
+					Hashtable entry = parser.nextEntry();
+					if (entry == null)
+						break;
+					Object[] dst = new Object[fields];
+
+					for (Enumeration e = entry.keys(); e.hasMoreElements();) {
+						String name = (String) e.nextElement();
+
+						int i = findField(name);
+
+						if (i <= 0) {
+							addField(name, DbField.STRING).getNumber();
+							fields++;
+							Object[] tmp = new Object[fields];
+							System.arraycopy(dst, 0, tmp, 0, dst.length);
+							dst = tmp;
+						}
+						dst[i - 1] = entry.get(name);
+					}
+					records.addElement(dst);
+				}
+
+				reader.close();
 			}
 			catch (IOException e) {
 				throw new DbException(e.toString());

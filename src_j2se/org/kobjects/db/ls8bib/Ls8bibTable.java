@@ -2,8 +2,9 @@ package org.kobjects.db.ls8bib;
 
 import java.io.*;
 import java.net.*;
-//import java.util.*;
+import java.util.*;
 import org.kobjects.db.bibtex.BibtexTable;
+import org.kobjects.bibtex.BibtexParser;
 import org.kobjects.db.*;
 
 /**
@@ -60,6 +61,16 @@ public class Ls8bibTable extends BibtexTable {
 		super.update(index, entry);
 	}
 
+	protected synchronized void update(Reader reader, Writer info)
+		throws IOException, DbException {
+
+	}
+
+	void update(Hashtable entry, Writer info) throws IOException {
+		int fields = getFieldCount();
+		info.write ("NYI");
+	}
+
 
 	public void run() {
 
@@ -69,7 +80,21 @@ public class Ls8bibTable extends BibtexTable {
 			while (true) {
 
 				try {
-					Socket socket = serverSocket.accept ();
+					Socket socket = serverSocket.accept();
+					Reader reader = new InputStreamReader(socket.getInputStream());
+					Writer writer = new OutputStreamWriter(socket.getOutputStream());
+					
+					BibtexParser bp = new BibtexParser(reader);
+					
+					while(true){
+						Hashtable entry = bp.nextEntry();
+						if(entry== null) break;
+						update (entry, writer);
+					}
+					
+					reader.close();
+					writer.close();
+					socket.close();
 				}
 				catch(IOException e) {
 					e.printStackTrace();

@@ -146,8 +146,15 @@ public class RamTable implements DbTable {
         if (sortfield != -1 || updated)
             throw new RuntimeException("NYI");
 
-        return new RamRecord(this, selected, fields);
+		return getRecords(selected, fields);
+ //       return new RamRecord(this, selected, fields);
     }
+
+
+	protected RamRecord getRecords (Vector selected, int [] fields) {
+			return new RamRecord (this, selected, fields);
+	}
+
 
     public void setIdField(int idField) throws DbException {
 

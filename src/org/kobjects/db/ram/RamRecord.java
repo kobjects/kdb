@@ -3,19 +3,23 @@ package org.kobjects.db.ram;
 import java.util.*;
 import org.kobjects.db.*;
 
-class RamRecord implements DbRecord {
+public class RamRecord implements DbRecord {
 
-    Vector selection;
-    int current = -1;
-    int index; // index in records vector
-    RamTable table;
+    protected Vector selection;
+    /** index in selected */
+    protected int current = -1;
+    /** index in table.records */
+    protected int index; // index in records vector
+    protected RamTable table;
 
-    Object[] values;
-    boolean modified;
+	/** copy of current values */
+    protected Object[] values;
+    
+    protected boolean modified;
     boolean deleted;
     int[] selectedFields;
 
-    RamRecord(
+    protected RamRecord(
         RamTable table,
         Vector selection,
         int[] selectedFields) {

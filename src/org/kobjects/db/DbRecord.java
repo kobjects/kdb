@@ -24,27 +24,25 @@ import javax.microedition.rms.*;
 
 public abstract class DbRecord {
 
-    private DbTable table;
-    private Object[] values;
-    private boolean modified;
+    protected DbTable table;
 
+    protected Object[] values;
+
+    protected boolean modified;
 
     public void clear() {
         values = new Object[table.getFieldCount()];
         modified = true;
     }
 
-
     public Object getObject(int column) {
         return values[column];
     }
-
 
     public void setObject(int column, Object value) {
         values[column] = value;
         modified = true;
     }
-
 
     public boolean getBoolean(int column) {
         Boolean b = (Boolean)getObject(column);

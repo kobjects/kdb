@@ -17,9 +17,12 @@ public class BibtexTable extends RamTable implements Runnable {
 
 	protected String filename;
 	protected String documentDir;
-	protected long lastModified;
+
 	int fileIndex = -1;
 	int keyIndex = -1;
+
+	Hashtable keyTable = new Hashtable();
+
 
 	static final String[] DEFAULT_FIELDS =
 		{
@@ -65,7 +68,8 @@ public class BibtexTable extends RamTable implements Runnable {
 
 		try {
 			adr = InetAddress.getLocalHost().getAddress();
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			adr = new byte[0];
 		}
 
@@ -79,80 +83,49 @@ public class BibtexTable extends RamTable implements Runnable {
 		return buf.toString();
 	}
 
-	protected synchronized void reload() throws DbException {
+	protected synchronized void update(Reader reader, Writer info)
+		throws IOException, DbException {
+		BibtexParser parser = new BibtexParser(new BufferedReader(reader));
 
-		File file = new File(filename);
+		int fields = getFieldCount();
+		int lastInc = 0;
 
-		exists = file.exists();
+		while (true) {
+			Hashtable entry = parser.nextEntry();
+			Object[] dst = new Object[fields];
 
-		System.out.println(
-			"trying to (re)load bib file: "
-				+ file.getAbsoluteFile()
-				+ " existing:"
-				+ exists);
+			if (entry == null)
+				break;
 
-		if (exists) {
-			try {
-				lastModified = file.lastModified();
-
-				org.kobjects.bibtex.BibtexParser parser =
-					new org.kobjects.bibtex.BibtexParser(
-						new BufferedReader(new FileReader(file)));
-
-				if (getFieldCount() == 0) {
-
-					for (int i = 0; i < DEFAULT_FIELDS.length; i++) {
-						if (findField(DEFAULT_FIELDS[i]) <= 0)
-							addField(DEFAULT_FIELDS[i], DbField.STRING);
-					}
-
-					setIdField(findField("id"));
-					keyIndex = findField("key");
-
-					fileIndex = getFieldCount();
-					addField("pdfFile", DbField.BINARY);
-				}
-
-				int fields = getFieldCount();
-				int lastInc = 0;
-
-				while (true) {
-					Hashtable entry = parser.nextEntry();
-					Object[] dst = new Object[fields];
-					if (entry == null)
-						break;
-					for (Enumeration e = entry.keys(); e.hasMoreElements();) {
-						String name = (String) e.nextElement();
-
-						int i = findField(name);
-						if (i <= 0) {
-							addField(name, DbField.STRING).getNumber();
-							fields++;
-							Object[] tmp = new Object[fields];
-							System.arraycopy(dst, 0, tmp, 0, dst.length);
-							dst = tmp;
-							lastInc = records.size();
-						}
-						dst[i - 1] = entry.get(name);
-					}
-					records.addElement(dst);
-				}
-
-				// ensure equal record sizes
-
-				for (int i = 0; i < lastInc; i++) {
-
-					Object[] r = (Object[]) records.elementAt(i);
-					Object[] s = new Object[fields];
-
-					System.arraycopy(r, 0, s, 0, r.length);
-					records.setElementAt(s, i);
-				}
-			} catch (IOException e) {
-				throw new DbException(e.toString());
+			if (info != null) {
+				info.write ("adding/updating entry/");
+				info.flush();				
 			}
+
+			for (Enumeration e = entry.keys(); e.hasMoreElements();) {
+				String name = (String) e.nextElement();
+
+				int i = findField(name);
+
+				if (i <= 0 && info != null) {
+					info.write("- ignoring unknown field: " + name);
+				}
+				else {
+					if (i <= 0) {
+						addField(name, DbField.STRING).getNumber();
+						fields++;
+						Object[] tmp = new Object[fields];
+						System.arraycopy(dst, 0, tmp, 0, dst.length);
+						dst = tmp;
+						lastInc = records.size();
+					}
+					dst[i - 1] = entry.get(name);
+				}
+			}
+			records.addElement(dst);
 		}
 
+		reader.close();
 	}
 
 	public void connect(String connector) throws DbException {
@@ -166,7 +139,47 @@ public class BibtexTable extends RamTable implements Runnable {
 			filename = filename.substring(0, cut);
 		}
 
-		reload();
+		File file = new File(filename);
+
+		exists = file.exists();
+
+		System.out.println(
+			"trying to (re)load bib file: "
+				+ file.getAbsoluteFile()
+				+ " existing:"
+				+ exists);
+
+		for (int i = 0; i < DEFAULT_FIELDS.length; i++) {
+			if (findField(DEFAULT_FIELDS[i]) <= 0)
+				addField(DEFAULT_FIELDS[i], DbField.STRING);
+		}
+
+		setIdField(findField("id"));
+		keyIndex = findField("key");
+
+		fileIndex = getFieldCount();
+		addField("pdfFile", DbField.BINARY);
+
+		if (exists) {
+			try {
+				update(new FileReader(file), null);
+			}
+			catch (IOException e) {
+				throw new DbException(e.toString());
+			}
+
+			// ensure equal record sizes
+
+			for (int i = 0; i < records.size(); i++) {
+
+				Object[] r = (Object[]) records.elementAt(i);
+				Object[] s = new Object[getFieldCount()];
+				if (r.length == s.length)
+					break;
+				System.arraycopy(r, 0, s, 0, r.length);
+				records.setElementAt(s, i);
+			}
+		}
 	}
 
 	public void open() throws DbException {
@@ -180,7 +193,8 @@ public class BibtexTable extends RamTable implements Runnable {
 				Thread.sleep(15000);
 				if (modified)
 					rewrite();
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -189,14 +203,15 @@ public class BibtexTable extends RamTable implements Runnable {
 	protected void update(int i, Object[] entry) throws DbException {
 		if (entry[idField] == null)
 			entry[idField] = generateId();
+
 		super.update(i, entry);
-		
+
 		modified = true;
 	}
 
 	protected void writeEntry(BufferedWriter w, Object[] entry)
 		throws IOException {
-			
+
 		BibtexWriter bw = new BibtexWriter(w);
 
 		bw.startEntry((String) entry[0], (String) entry[1]);
@@ -222,7 +237,8 @@ public class BibtexTable extends RamTable implements Runnable {
 			nf.renameTo(new File(filename));
 
 			modified = false;
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new DbException("" + e);
 		}
 		System.out.println("BibtexTable: rewrite() finished");

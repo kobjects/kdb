@@ -113,7 +113,7 @@ public class DbField {
      * factory method.
      */
 
-    DbField(int number, String name, int type) {
+    public DbField(int number, String name, int type) {
         this.number = number;
         this.name = name;
         this.type = type;

@@ -17,8 +17,6 @@ import javax.microedition.rms.*;
 
 public abstract class DbTable {
 
-    protected Vector fields = new Vector();
-
     public abstract boolean exists();
 
     /**
@@ -27,6 +25,8 @@ public abstract class DbTable {
      * klein.
      */
     public static DbTable connect(String connector) throws DbException {
+        DbTable table = null;
+
         try {
             int p = connector.indexOf(':');
             String proto = connector.substring(0, p);
@@ -35,61 +35,31 @@ public abstract class DbTable {
 
             System.out.println(proto + " / " + cls + " org.kobjects.db." + proto + "." + cls + "Table");
 
-            DbTable table = (DbTable)Class.forName("org.kobjects.db." + proto + "." + cls + "Table").newInstance();
-            table.init(connector);
-
-            return table;
+            table = (DbTable)Class.forName("org.kobjects.db." + proto + "." + cls + "Table").newInstance();
         }
         catch (Exception e) {
             throw new DbException("Can't connect to table \"" + connector + "\" (" + e.getClass().getName() + ")");
         }
+
+        table.init(connector);
+        return table;
     }
 
     protected abstract void init(String connector);
 
-
     public abstract void delete() throws DbException;
-
 
     public abstract void create() throws DbException;
 
-
     public abstract void open() throws DbException;
 
+    public abstract DbField addField(String name, int type) throws DbException;
 
-    public DbField addField(String name, int type) throws DbException {
-        //checkOpen(false);
+    public abstract int getFieldCount();
 
-        if (findField(name) != -1) {
-            throw new DbException
-                ("Field \"" + name + "\" already exists in "+this);
-        }
+    public abstract DbField getField(int i);
 
-        //        if (fields.size() == 255) {
-        //    throw new DbException("Field IDs in table \"" + this.name + "\" exhausted.");
-        //}
-
-        DbField field = new DbField(fields.size(), name, type);
-        fields.addElement(field);
-
-        return field;
-    }
-
-    public int getFieldCount() {
-        return fields.size();
-    }
-
-    public DbField getField(int i) {
-        return (DbField)fields.elementAt(i);
-    }
-
-    public int findField(String name) {
-        for (int i = 0; i < fields.size(); i++) {
-            if (getField(i).getName().equals(name)) return i;
-        }
-
-        return -1;
-    }
+    public abstract int findField(String name);
 
     public abstract void close();
 

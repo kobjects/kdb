@@ -257,15 +257,21 @@ public class JdbcTable implements DbTable {
         checkOpen(true);
 
         StringBuffer buf = new StringBuffer("select ");
-        if (fields == null)
-            buf.append('*');
-        else {
+        
+        if (fields == null) {
+			fields = new int [getFieldCount()];
+			for (int i = 0; i < getFieldCount(); i++) {
+				fields[i] = i+1;	
+			}        	
+        }
+        
+        
             buf.append(getField(fields[0]).getName());
             for (int i = 1; i < fields.length; i++) {
                 buf.append(", ");
                 buf.append(getField(fields[i]).getName());
             }
-        }
+
         buf.append(" from ");
         buf.append(tableName);
         if (condition != null)

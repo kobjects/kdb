@@ -25,6 +25,10 @@ public class RootNode extends AbstractNode {
     JComboBox typeComboBox = new JComboBox (FILE_TYPES);
     JFileChooser fileChooser = new JFileChooser ();
 
+    JTextField jdbcUrlField = new JTextField (40);
+    JTextField jdbcUserField = new JTextField (40);
+    JTextField jdbcPasswordField = new JTextField (40);
+
     public RootNode (TableBrowser browser) {
 	super (null, true);
 
@@ -36,7 +40,11 @@ public class RootNode extends AbstractNode {
 	c.weightx = 1;
 	c.weighty = 0;
 	c.fill = c.HORIZONTAL;
-	panel.add (new JLabel ("table address:"), c);
+
+	panel.add (new JLabel (" "), c);
+
+	c.gridy++;
+	panel.add (new JLabel ("Table URL:"), c);
 
 	Box box = new Box (BoxLayout.X_AXIS);
 	box.add (urlField);
@@ -45,14 +53,46 @@ public class RootNode extends AbstractNode {
 	c.gridy++;
 	panel.add (box, c);
 
+	c.gridy++;
+	panel.add (new JLabel (" "), c);
+
+	c.gridy++;
+	panel.add (new JLabel ("Select File:"), c);
+
 	box = new Box (BoxLayout.X_AXIS);
 	box.add (typeComboBox);
 	box.add (new JButton 
-	    (new InvokeAction ("select file", this, "selectFile")));
+	    (new InvokeAction ("open", this, "selectFile")));
 	box.add (Box.createGlue ());
 	c.gridy++;
 	panel.add (box, c);
-	
+
+	c.gridy++;
+	panel.add (new JLabel (" "), c);
+
+	JPanel jdbcPanel = new JPanel (new BorderLayout ());
+
+	JPanel labels = new JPanel (new GridLayout (0, 1));
+	JPanel fields = new JPanel (new GridLayout (0, 1));
+       
+	labels.add (new JLabel ("JDBC URL:"));
+	labels.add (new JLabel ("JDBC User:"));
+	labels.add (new JLabel ("JDBC Password"));
+	fields.add (jdbcUrlField);
+	fields.add (jdbcUserField);
+	fields.add (jdbcPasswordField);
+
+	jdbcPanel.add (labels, BorderLayout.WEST);
+	jdbcPanel.add (fields, BorderLayout.CENTER);
+
+	c.gridy++;
+	panel.add (jdbcPanel, c);
+
+	c.anchor = c.WEST;
+	c.fill = c.NONE;
+	c.gridy++;
+	panel.add (new JButton (new InvokeAction 
+	    ("open jdbc connection", this, "openJdbc")), c);
 
 	c.gridy++;
 	c.weightx = 1;
@@ -66,6 +106,13 @@ public class RootNode extends AbstractNode {
 	open (urlField.getText ());
     }
 
+
+    public void openJdbc () {
+	open (jdbcUrlField.getText () 
+	      + ";user=" + jdbcUserField.getText ()
+	      + ";password=" + jdbcUserField.getText ()
+	      + ";table=ALL_TABLES");
+    }
 
     public void open (String connector) {
 	try {

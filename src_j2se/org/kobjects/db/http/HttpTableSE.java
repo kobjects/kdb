@@ -169,7 +169,7 @@ public class HttpTableSE implements DbTable {
 			is.close ();
 			//connection.close ();
 
-			return new HttpRecord (this, selected);			
+			return new HttpRecord (this, null, selected);			
 		}
 		catch (IOException e) {
 			throw new DbException (e.toString (), e);
@@ -195,8 +195,22 @@ public class HttpTableSE implements DbTable {
 		throws DbException {
 			
 		try {			
-			if (fields != null) throw new RuntimeException ("fields param NYI");
-			
+		    StringBuffer buf = new StringBuffer (url);
+		    buf.append (conjunction);
+		    buf.append ("cmd=select");
+		  
+		    if (fields != null) {
+			buf.append ("&fields=");
+			buf.append (fields[0]);
+			for (int i = 1; i < fields.length; i++) {
+			    buf.append (",");
+			    buf.append (fields[i]);
+			}
+		    }
+		    if (condition != null) {
+			buf.append ("&where=");
+			buf.append (urlEncode (condition.toString ()));
+		    }
 			
 			HttpURLConnection connection =
 				(HttpURLConnection) new URL(url + conjunction + "cmd=select" 
@@ -213,13 +227,22 @@ public class HttpTableSE implements DbTable {
 				String line = reader.readLine();
 				if (line == null)
 					break;
-				selected.addElement (Csv.decode(line));
+				Object [] src = Csv.decode(line);
+				if (fields == null) 
+				    selected.addElement (src);
+				else {
+				    Object [] dst = new Object [getFieldCount ()]; 
+				    for (int i = 0; i < fields.length; i++) 
+					dst [fields[i]] = src [i];
+				  
+				    selected.addElement (dst);
+				}
 			}
 
 			is.close ();
 			//connection.close ();
 			
-			return new HttpRecord (this, selected);
+			return new HttpRecord (this, fields, selected);
 		}
 		catch (IOException e) {
 			throw new DbException (e.toString (), e);

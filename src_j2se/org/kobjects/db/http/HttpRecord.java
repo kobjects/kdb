@@ -12,9 +12,11 @@ public class HttpRecord implements DbRecord {
 	Object[] values;
 	boolean modified;
 	boolean deleted;
+    int [] fields;
 
-	HttpRecord(HttpTableSE table, Vector selection) {
+	HttpRecord(HttpTableSE table, int [] fields, Vector selection) {
 		this.table = table;
+		this.fields = fields;
 		this.selection = selection;
 		values = new Object[table.getFieldCount()];
 	}
@@ -65,7 +67,7 @@ public class HttpRecord implements DbRecord {
 	}
 
 	public int [] getSelectedFields() {
-		return null;
+		return fields;
 	}
 
 	public boolean isDeleted() {

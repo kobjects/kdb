@@ -1,218 +1,232 @@
 package org.kobjects.db.ram;
 
 import java.util.*;
+import java.io.*;
 import org.kobjects.db.*;
 
 public class RamRecord implements DbRecord {
 
-    protected Vector selection;
-    /** index in selected */
-    protected int current = -1;
-    /** index in table.records */
-    protected int index; // index in records vector
-    protected RamTable table;
+	protected Vector selection;
+	/** index in selected */
+	protected int current = -1;
+	/** index in table.records */
+	protected int index; // index in records vector
+	protected RamTable table;
 
 	/** copy of current values */
-    protected Object[] values;
-    
-    protected boolean modified;
-    boolean deleted;
-    int[] selectedFields;
+	protected Object[] values;
 
-    protected RamRecord(
-        RamTable table,
-        Vector selection,
-        int[] selectedFields) {
-        this.table = table;
-        this.selection = selection;
-        this.selectedFields = selectedFields;
-        values = new Object[table.getFieldCount()];
-    }
+	protected boolean modified;
+	boolean deleted;
+	int[] selectedFields;
 
-    public void clear() {
-        values = new Object[getTable().getFieldCount()];
-        modified = true;
-    }
+	protected RamRecord(
+		RamTable table,
+		Vector selection,
+		int[] selectedFields) {
+		this.table = table;
+		this.selection = selection;
+		this.selectedFields = selectedFields;
+		values = new Object[table.getFieldCount()];
+	}
 
-    public void deleteAll() throws DbException {
-        beforeFirst();
-        while (hasNext()) {
-            next();
-            delete();
-        }
-    }
+	public void clear() {
+		values = new Object[getTable().getFieldCount()];
+		modified = true;
+	}
 
-    public Object getObject(int column) {
-        if (selectedFields == null)
-            return values[column];
+	public void deleteAll() throws DbException {
+		beforeFirst();
+		while (hasNext()) {
+			next();
+			delete();
+		}
+	}
 
-        for (int i = 0; i < selectedFields.length; i++)
-            if (selectedFields[i] == column)
-                return values[column];
+	public Object getObject(int column) {
+		if (selectedFields == null)
+			return values[column];
 
-        // provide always access to id field if available
-        if (column == table.idField)
-            return values[column];
+		for (int i = 0; i < selectedFields.length; i++)
+			if (selectedFields[i] == column)
+				return (values[i] instanceof byte[])
+					? new ByteArrayInputStream((byte[]) values[column])
+					: values[column];
 
-        throw new IllegalArgumentException(
-            "Field " + column + " not in selection!");
-    }
+		// provide always access to id field if available
+		if (column == table.idField)
+			return values[column];
 
-    public boolean getBoolean(int column) {
-        Boolean b = (Boolean) getObject(column);
-        return (b == null) ? false : b.booleanValue();
-    }
+		throw new IllegalArgumentException(
+			"Field " + column + " not in selection!");
+	}
 
-    public int getInteger(int column) {
-        Integer i = (Integer) getObject(column);
-        return (i == null) ? 0 : i.intValue();
-    }
+	public boolean getBoolean(int column) {
+		Boolean b = (Boolean) getObject(column);
+		return (b == null) ? false : b.booleanValue();
+	}
 
-    public long getLong(int column) {
-        Long l = (Long) getObject(column);
-        return (l == null) ? 0 : l.longValue();
-    }
+	public int getInteger(int column) {
+		Integer i = (Integer) getObject(column);
+		return (i == null) ? 0 : i.intValue();
+	}
 
-    public int getRowCount() {
-        return selection.size();
-    }
+	public long getLong(int column) {
+		Long l = (Long) getObject(column);
+		return (l == null) ? 0 : l.longValue();
+	}
 
-    public int[] getSelectedFields() {
-        return selectedFields;
-    }
+	public int getRowCount() {
+		return selection.size();
+	}
 
-    public String getString(int column) {
-        Object o = getObject(column);
-        return (o == null) ? null : o.toString();
-    }
+	public int[] getSelectedFields() {
+		return selectedFields;
+	}
 
-    public byte[] getBinary(int column) {
-        return (byte[]) getObject(column);
-    }
+	public String getString(int column) {
+		Object o = getObject(column);
+		return (o == null) ? null : o.toString();
+	}
 
-    public boolean isDeleted() {
-        return deleted;
-    }
+	public InputStream getBinary(int column) {
+		return (InputStream) getObject(column);
+	}
 
-    public void setBoolean(int column, boolean value) {
-        setObject(column, new Boolean(value));
-    }
+	public boolean isDeleted() {
+		return deleted;
+	}
 
-    public void setInteger(int column, int value) {
-        setObject(column, new Integer(value));
-    }
+	public void setBoolean(int column, boolean value) {
+		setObject(column, new Boolean(value));
+	}
 
-    public void setLong(int column, long value) {
-        setObject(column, new Long(value));
-    }
+	public void setInteger(int column, int value) {
+		setObject(column, new Integer(value));
+	}
 
-    public void setObject(int column, Object value) {
-        values[column] = value;
-        modified = true;
-    }
+	public void setLong(int column, long value) {
+		setObject(column, new Long(value));
+	}
 
-    public void setString(int column, String value) {
-        setObject(column, value);
-    }
+	public void setObject(int column, Object value) {
+		if (value instanceof InputStream) {
+			try {
+				InputStream is = (InputStream) value;
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				byte[] buf = new byte[128];
+				while (true) {
+					int cnt = is.read(buf);
+					if (cnt == -1)
+						break;
+					bos.write(buf, 0, cnt);
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e.toString());
+			}
+		}
+		values[column] = value;
+		modified = true;
+	}
 
-    public void setBinary(int column, byte[] value) {
-        //byte[] bytes = new byte[value.length];
-        //System.arraycopy(value, 0, bytes, 0, value.length);
-        setObject(column, value); // was: bytes
-    }
+	public void setString(int column, String value) {
+		setObject(column, value);
+	}
 
-    public void insert() throws DbException {
-        modified = true;
-        index = table.INSERT_ROW;
+	public void setBinary(int column, InputStream value) {
+		//byte[] bytes = new byte[value.length];
+		//System.arraycopy(value, 0, bytes, 0, value.length);
 
-        int cnt = table.getFieldCount();
-        for (int i = 0; i < cnt; i++) {
-            values[i] = table.getField(i).getDefault();
-        }
-    }
+		setObject(column, value); // was: bytes
+	}
 
-    public void insert(Object[] values) throws DbException {
-        insert();
+	public void insert() throws DbException {
+		modified = true;
+		index = table.INSERT_ROW;
 
-        for (int i = 0; i < values.length; i++) {
-            setObject(i, values[i]);
-        }
-    }
+		int cnt = table.getFieldCount();
+		for (int i = 0; i < cnt; i++) {
+			values[i] = table.getField(i).getDefault();
+		}
+	}
 
-    public boolean isModified() {
-        return modified;
-    }
+	public void insert(Object[] values) throws DbException {
+		insert();
 
-    public void absolute(int position) throws DbException {
-        beforeFirst();
-        for (int i = 0; i < position; i++)
-            next();
-    }
+		for (int i = 0; i < values.length; i++) {
+			setObject(i, values[i]);
+		}
+	}
 
-    public void refresh() {
-        index =
-            ((Integer) selection.elementAt(current)).intValue();
-        Object[] content =
-            (Object[]) table.records.elementAt(index);
+	public boolean isModified() {
+		return modified;
+	}
 
-        deleted = content == null;
+	public void absolute(int position) throws DbException {
+		beforeFirst();
+		for (int i = 0; i < position; i++)
+			next();
+	}
 
-        for (int i = 0; i < content.length; i++)
-            values[i] = deleted ? null : content[i];
+	public void refresh() {
+		index = ((Integer) selection.elementAt(current)).intValue();
+		Object[] content = (Object[]) table.records.elementAt(index);
 
-        modified = false;
-    }
+		deleted = content == null;
 
-    public void update() throws DbException {
+		for (int i = 0; i < content.length; i++)
+			values[i] = deleted ? null : content[i];
 
-/*        Object[] content = null;
+		modified = false;
+	}
 
-        if (!deleted) {
-            content = new Object[values.length];
-            for (int i = 0; i < values.length; i++)
-                content[i] = values[i];
-        } */
+	public void update() throws DbException {
 
-        table.update(index, deleted ? null : values);
+		/*        Object[] content = null;
+		
+		        if (!deleted) {
+		            content = new Object[values.length];
+		            for (int i = 0; i < values.length; i++)
+		                content[i] = values[i];
+		        } */
 
-    }
+		table.update(index, deleted ? null : values);
 
-    public void delete() {
-        deleted = true;
-    }
+	}
 
-    public int getRow() {
-        return current + 1;
-    }
+	public void delete() {
+		deleted = true;
+	}
 
-    public DbTable getTable() {
-        return table;
-    }
+	public int getRow() {
+		return current + 1;
+	}
 
-    public boolean hasNext() {
-        return selection != null
-            && current < selection.size() - 1;
-    }
+	public DbTable getTable() {
+		return table;
+	}
 
-    public void next() throws DbException {
-        if (!hasNext())
-            throw new DbException("no next available!");
-        index =
-            ((Integer) selection.elementAt(++current))
-                .intValue();
-        refresh();
-    }
+	public boolean hasNext() {
+		return selection != null && current < selection.size() - 1;
+	}
 
-    /** Places the cursor before the first record */
+	public void next() throws DbException {
+		if (!hasNext())
+			throw new DbException("no next available!");
+		index = ((Integer) selection.elementAt(++current)).intValue();
+		refresh();
+	}
 
-    public void beforeFirst() throws DbException {
-        current = -1;
-    }
+	/** Places the cursor before the first record */
 
-    /** Dispose does not need to do much in the case of 
-    ramtable */
+	public void beforeFirst() throws DbException {
+		current = -1;
+	}
 
-    public void dispose() {
-        //throw new RuntimeException ("NYI");
-    }
+	/** Dispose does not need to do much in the case of 
+	ramtable */
+
+	public void dispose() {
+		//throw new RuntimeException ("NYI");
+	}
 }

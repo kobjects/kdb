@@ -65,8 +65,8 @@ public class HttpRecord implements DbRecord {
         return (o == null) ? null : o.toString();
     }
 
-    public byte[] getBinary(int column) {
-        return (byte[]) getObject(column);
+    public InputStream getBinary(int column) {
+        return (InputStream) getBinary (column);
     }
 
     public int[] getSelectedFields() {
@@ -98,7 +98,7 @@ public class HttpRecord implements DbRecord {
         setObject(column, value);
     }
 
-    public void setBinary(int column, byte[] value) {
+    public void setBinary(int column, InputStream value) {
         //byte[] bytes = new byte[value.length];
         //System.arraycopy(value, 0, bytes, 0, value.length);
         setObject(column, value); // was: bytes

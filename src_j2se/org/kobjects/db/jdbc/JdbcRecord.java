@@ -1,8 +1,9 @@
 package org.kobjects.db.jdbc;
 
+import java.io.*;
+import java.sql.*;
 import org.kobjects.db.*;
 import org.kobjects.util.*;
-import java.sql.*;
 
 class JdbcRecord implements DbRecord {
 
@@ -98,8 +99,8 @@ class JdbcRecord implements DbRecord {
     /**
      * @see DbRecord#getBinary(int)
      */
-    public byte[] getBinary(int column) {
-		return (byte[]) getObject (column);	
+    public InputStream getBinary(int column) {
+		return (InputStream) getObject (column);	
     }
 
     /**
@@ -133,7 +134,7 @@ class JdbcRecord implements DbRecord {
     /**
      * @see DbRecord#setBinary(int, byte[])
      */
-    public void setBinary(int column, byte[] value) {
+    public void setBinary(int column, InputStream value) {
 		setObject (column, value);
     }
 

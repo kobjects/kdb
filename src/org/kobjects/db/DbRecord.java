@@ -49,7 +49,7 @@ public interface DbRecord {
 
     public String getString(int column);
 
-    public byte[] getBinary(int column);
+    public InputStream getBinary(int column);
 
     public void setBoolean(int column, boolean value);
 
@@ -59,7 +59,7 @@ public interface DbRecord {
 
     public void setString(int column, String value);
 
-    public void setBinary(int column, byte[] value);
+    public void setBinary(int column, InputStream value);
 
     public void refresh() throws DbException;
 

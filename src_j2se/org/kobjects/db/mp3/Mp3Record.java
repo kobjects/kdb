@@ -22,7 +22,7 @@ public class Mp3Record extends RamRecord {
 	public Object getObject(int index) {
 		if (index == 7) {
 			try {
-				File file = new File((String) values[0]);
+				File file = new File((String) values[1]);
 				byte[] data = new byte[(int) file.length()];
 				DataInputStream dis =
 					new DataInputStream(new FileInputStream(file));

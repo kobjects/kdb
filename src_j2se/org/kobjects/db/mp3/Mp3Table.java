@@ -104,7 +104,7 @@ public class Mp3Table extends RamTable {
 		
 		while (record.hasNext ()) {
 			record.next();
-			for (int i = 0; i < table.getFieldCount (); i++) {
+			for (int i = 0; i < table.getFieldCount ()-1; i++) {
 				System.out.println (record.getString (i));
 			}
 		}

@@ -1,16 +1,11 @@
 package org.kobjects.db.samples.swing;
 
-import java.util.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
 
 import javax.swing.*;
-import javax.swing.tree.*;
 
 import org.kobjects.swing.*;
 import org.kobjects.db.*;
-import org.kobjects.db.sql.*;
 import org.kobjects.db.swing.*;
 
 public class TableNode extends AbstractNode {
@@ -40,7 +35,7 @@ public class TableNode extends AbstractNode {
         c.gridx = 0;
         c.weightx = 1;
         c.weighty = 1;
-        c.fill = c.BOTH;
+        c.fill = GridBagConstraints.BOTH;
         panel.add(new JScrollPane(jTable), c);
 
         Box qBox = new Box(BoxLayout.X_AXIS);
@@ -49,7 +44,7 @@ public class TableNode extends AbstractNode {
 
         c.gridy++;
         c.weighty = 0;
-        c.fill = c.HORIZONTAL;
+        c.fill = GridBagConstraints.HORIZONTAL;
         panel.add(qBox, c);
 
         Box buttons = new Box(BoxLayout.X_AXIS);

@@ -4,7 +4,6 @@ import javax.swing.table.*;
 
 import org.kobjects.db.*;
 import org.kobjects.db.statistics.*;
-import org.kobjects.util.*;
 
 public class DbMetaTableModel extends AbstractTableModel {
 

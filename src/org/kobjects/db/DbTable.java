@@ -9,8 +9,6 @@ package org.kobjects.db;
  * @version 1.0
  */
 
-import java.io.*;
-import java.util.*;
 //import javax.microedition.rms.*;
 
 /**

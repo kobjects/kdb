@@ -1,16 +1,11 @@
 package org.kobjects.db.samples.swing;
 
-import java.util.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
 
 import javax.swing.*;
-import javax.swing.tree.*;
 
 import org.kobjects.swing.*;
 import org.kobjects.db.*;
-import org.kobjects.db.swing.*;
 
 public class RootNode extends AbstractNode {
 
@@ -38,7 +33,7 @@ public class RootNode extends AbstractNode {
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 0;
-        c.fill = c.HORIZONTAL;
+        c.fill = GridBagConstraints.HORIZONTAL;
 
         panel.add(new JLabel(" "), c);
 
@@ -88,8 +83,8 @@ public class RootNode extends AbstractNode {
         c.gridy++;
         panel.add(jdbcPanel, c);
 
-        c.anchor = c.WEST;
-        c.fill = c.NONE;
+        c.anchor = GridBagConstraints.WEST;
+        c.fill = GridBagConstraints.NONE;
         c.gridy++;
         panel.add(
             new JButton(
@@ -102,7 +97,7 @@ public class RootNode extends AbstractNode {
         c.gridy++;
         c.weightx = 1;
         c.weighty = 1;
-        c.fill = c.BOTH;
+        c.fill = GridBagConstraints.BOTH;
         panel.add(new JPanel(), c);
     }
 

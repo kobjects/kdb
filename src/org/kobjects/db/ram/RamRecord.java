@@ -180,7 +180,7 @@ public class RamRecord implements DbResultSet {
 
 	public void moveToInsertRow() throws DbException {
 		modified = true;
-		index = table.INSERT_ROW;
+		index = RamTable.INSERT_ROW;
 
 		int cnt = table.getFieldCount();
 		for (int i = 0; i < cnt; i++) {
@@ -221,14 +221,14 @@ public class RamRecord implements DbResultSet {
 	}
 
 	public void insertRow() throws DbException {
-		if (index != table.INSERT_ROW) 
+		if (index != RamTable.INSERT_ROW) 
 			throw new DbException("Not on Insert Row");
 		
 		table.update(index, deleted ? null : values);		
 	}
 
 	public void updateRow() throws DbException {
-		if (index == table.INSERT_ROW) 
+		if (index == RamTable.INSERT_ROW) 
 			throw new DbException("use insertRow for inserting records");
 
 		table.update(index, deleted ? null : values);

@@ -1,9 +1,7 @@
 package org.kobjects.db.swing;
 
-import java.util.*;
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.tree.*;
 
 import org.kobjects.db.*;
 import org.kobjects.swing.*;
@@ -50,7 +48,7 @@ public class SelectComponent extends JPanel {
 	    c.weighty = 0;
 	    c.gridx = 0;
 	    c.gridy = 0;
-	    c.fill = c.HORIZONTAL;
+	    c.fill = GridBagConstraints.HORIZONTAL;
 
 	    combo = new JComboBox 
 		(parent == null
@@ -150,7 +148,7 @@ public class SelectComponent extends JPanel {
 	    GridBagConstraints c = new GridBagConstraints ();
 	    c.gridx = 0;
 	    c.gridy = 0;
-	   	    c.fill = c.HORIZONTAL;
+	   	    c.fill = GridBagConstraints.HORIZONTAL;
 
 	    panel.add (fieldBox, c);
 	    c.gridy++;

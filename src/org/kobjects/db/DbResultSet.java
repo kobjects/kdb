@@ -15,7 +15,6 @@ package org.kobjects.db;
  */
 
 import java.io.*;
-import java.util.*;
 //import javax.microedition.rms.*;
 
 /**

@@ -4,12 +4,8 @@ import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.tree.*;
 
 import org.kobjects.swing.*;
-import org.kobjects.db.*;
-import org.kobjects.db.swing.*;
 
 public class TableBrowser extends JFrame {
 

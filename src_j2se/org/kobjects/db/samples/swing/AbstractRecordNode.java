@@ -1,15 +1,12 @@
 package org.kobjects.db.samples.swing;
 
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.tree.*;
 
 import org.kobjects.swing.*;
 import org.kobjects.util.ChainedRuntimeException;
 import org.kobjects.db.*;
 import org.kobjects.db.sql.*;
-import org.kobjects.db.swing.*;
 
 
 abstract class AbstractRecordNode extends AbstractNode {

@@ -1,12 +1,8 @@
 package org.kobjects.db.samples.swing;
 
-import java.util.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
 
 import javax.swing.*;
-import javax.swing.tree.*;
 
 import org.kobjects.swing.*;
 import org.kobjects.util.*;

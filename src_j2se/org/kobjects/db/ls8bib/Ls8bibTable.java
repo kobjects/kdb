@@ -33,21 +33,28 @@ public class Ls8bibTable extends BibtexTable {
                             new PrintStream(
                                 socket.getOutputStream());
 
-                        BibtexParser bp =
-                            new BibtexParser(reader);
+                        if (!socket.getInetAddress().getHostAddress()
+                            .startsWith("129.217.30."))
+                            writer.println(
+                                "connection refused outside ls8 net");
+                        else {
 
-                        try {
-                            while (true) {
-                                Hashtable entry = bp.nextEntry();
-                                if (entry == null)
-                                    break;
-                                update(entry, writer);
+                            BibtexParser bp =
+                                new BibtexParser(reader);
+
+                            try {
+                                while (true) {
+                                    Hashtable entry =
+                                        bp.nextEntry();
+                                    if (entry == null)
+                                        break;
+                                    update(entry, writer);
+                                }
+                            }
+                            catch (Exception e) {
+                                e.printStackTrace(writer);
                             }
                         }
-                        catch (Exception e) {
-                            e.printStackTrace(writer);
-                        }
-
                         reader.close();
                         writer.close();
                         socket.close();
@@ -131,6 +138,12 @@ public class Ls8bibTable extends BibtexTable {
         String key = (String) entry.get("key");
         String id = (String) entry.get("id");
 
+		if (key == null) {
+			out.println ("entry without key not accepted!");
+			return;
+		}
+		
+
         Integer box = null;
         boolean delete = false;
 
@@ -170,6 +183,7 @@ public class Ls8bibTable extends BibtexTable {
             int i = findField(name);
             if (i > 0) {
                 String value = (String) entry.get(name);
+                record[i-1] = value;
                 out.println("- " + name + ": " + value);
             }
             else {
@@ -180,7 +194,9 @@ public class Ls8bibTable extends BibtexTable {
         update(recordIndex, record);
 
         out.println(
-            "record updated; bibtex file will be rewritten in up to 15 seconds");
+            "record (new key: "
+                + record[KEY_INDEX]
+                + ") updated; bibtex file will be rewritten in up to 15 seconds");
         out.println();
     }
 

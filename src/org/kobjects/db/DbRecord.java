@@ -9,6 +9,15 @@ package org.kobjects.db;
  * @version 1.0
  */
 
+/**
+ * To do:
+ *
+ * - Warum stehen hier alle Zugriffsmethoden quasi für RMS drin. Für andere DBs
+ *   wird der Zugriff mit dem Umweg über Objekte doch eher lästig sein. Dito für
+ *   absolute etc.
+ * - Es fehlen: Get RowCount
+ * - Sollte das nicht eher ein Interface sein?
+ */
 import java.io.*;
 import java.util.*;
 import javax.microedition.rms.*;
@@ -136,13 +145,13 @@ public abstract class DbRecord {
     public abstract void next() throws DbException;
 
 
-    public abstract void reset (); 
+    public abstract void reset ();
 
 
     public void absolute(int position) throws DbException {
-	reset ();
-	for (int i = 0; i < position; i++) 
-	    next ();
+        reset ();
+        for (int i = 0; i < position; i++)
+            next ();
     }
 
 

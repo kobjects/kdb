@@ -13,11 +13,11 @@ import java.io.*;
 import java.util.*;
 import javax.microedition.rms.*;
 
-// must be abstract class not interface because of addField 
+// must be abstract class not interface because of addField
 
 public abstract class DbTable {
 
-    
+
     protected boolean open;
 
 
@@ -27,7 +27,12 @@ public abstract class DbTable {
 
     public abstract boolean exists();
 
-    
+
+    /**
+     * Factory method mit load by name? Braucht wohl zweite Methode zum
+     * connecten. Namensschema: Db<typ>Table, mit <typ> erster Buchstabe groﬂ, Rest
+     * klein.
+     */
     public abstract void connect (String connector);
 
 
@@ -45,10 +50,10 @@ public abstract class DbTable {
 
         if (findField(name) != -1) {
             throw new DbException
-		("Field \"" + name + "\" already exists in "+this);
+                ("Field \"" + name + "\" already exists in "+this);
         }
 
-	//        if (fields.size() == 255) {
+        //        if (fields.size() == 255) {
         //    throw new DbException("Field IDs in table \"" + this.name + "\" exhausted.");
         //}
 
@@ -77,7 +82,7 @@ public abstract class DbTable {
 
     public abstract void close();
 
-    
+
     /*
     public void deleteRecord(int id) throws DbException {
         checkOpen(true);
@@ -89,7 +94,7 @@ public abstract class DbTable {
     public abstract DbRecord select (Object id) throws DbException;
 
 
-    public abstract DbRecord select (DbExpression filter, int orderField, boolean orderReverse, boolean updated) throws DbException;
+    public abstract DbRecord select (DbCondition filter, int orderField, boolean orderReverse, boolean updated) throws DbException;
     /* {
         checkOpen(true);
 
@@ -103,11 +108,5 @@ public abstract class DbTable {
         catch (RecordStoreException e) {
             throw new DbException("Error selecting from table " + name + " (" + e.getClass().getName() + ")");
         }
-	}*/
-
-
+        }*/
 }
-
-
-
-

@@ -5,6 +5,7 @@ import java.util.*;
 
 import org.kobjects.db.*;
 import org.kobjects.db.ram.*;
+import org.kobjects.bibtex.*;
 
 import java.net.*;
 
@@ -14,286 +15,244 @@ import java.net.*;
 
 public class BibtexTable extends RamTable implements Runnable {
 
-    protected String filename;
-    protected String documentDir;
-    protected long lastModified;
-    int fileIndex = -1;
-    int keyIndex = -1;
-    
-    static final String[] DEFAULT_FIELDS =
-        {
-            "author",
-            "id",
-            "key",
-            "booktitle",
-            "editor",
-            "year",
-            "month",
-            "issue",
-            "type"};
+	protected String filename;
+	protected String documentDir;
+	protected long lastModified;
+	int fileIndex = -1;
+	int keyIndex = -1;
 
-    public BibtexTable() {
-    }
+	static final String[] DEFAULT_FIELDS =
+		{
+			"author",
+			"id",
+			"key",
+			"booktitle",
+			"editor",
+			"year",
+			"month",
+			"issue",
+			"type" };
 
-    public BibtexTable(String filename) throws DbException {
-        connect("bibtex:" + filename);
-    }
+	public BibtexTable() {
+	}
 
-    static void hex(StringBuffer buf, long l, int digits) {
-        String h = Long.toHexString(l);
-        for (int i = h.length(); i < digits; i++)
-            buf.append('0');
+	public BibtexTable(String filename) throws DbException {
+		connect("bibtex:" + filename);
+	}
 
-        buf.append(h);
-    }
+	static void hex(StringBuffer buf, long l, int digits) {
+		String h = Long.toHexString(l);
+		for (int i = h.length(); i < digits; i++)
+			buf.append('0');
 
-    static String generateId() {
-        long time0 = System.currentTimeMillis();
-        long time = System.currentTimeMillis();
+		buf.append(h);
+	}
 
-        while (time == time0) {
-            Thread.yield();
-            time = System.currentTimeMillis();
-        }
+	static String generateId() {
+		long time0 = System.currentTimeMillis();
+		long time = System.currentTimeMillis();
 
-        while (time == System.currentTimeMillis()) {
-            Thread.yield();
-        }
+		while (time == time0) {
+			Thread.yield();
+			time = System.currentTimeMillis();
+		}
 
-        byte[] adr;
+		while (time == System.currentTimeMillis()) {
+			Thread.yield();
+		}
 
-        try {
-            adr = InetAddress.getLocalHost().getAddress();
-        }
-        catch (Exception e) {
-            adr = new byte[0];
-        }
+		byte[] adr;
 
-        StringBuffer buf = new StringBuffer();
+		try {
+			adr = InetAddress.getLocalHost().getAddress();
+		} catch (Exception e) {
+			adr = new byte[0];
+		}
 
-        for (int i = 0; i < adr.length; i++)
-            hex(buf, ((int) adr[i]) & 255, 2);
+		StringBuffer buf = new StringBuffer();
 
-        hex(buf, time, 16);
+		for (int i = 0; i < adr.length; i++)
+			hex(buf, ((int) adr[i]) & 255, 2);
 
-        return buf.toString();
-    }
+		hex(buf, time, 16);
 
-    protected synchronized void reload() throws DbException {
+		return buf.toString();
+	}
 
-        Vector rNew = new Vector();
-        Hashtable iNew = new Hashtable();
-
+	protected synchronized void reload() throws DbException {
 
 		File file = new File(filename);
-		
-		
-        exists = file.exists();
-        
-       System.out.println ("trying to (re)load bib file: "+file.getAbsoluteFile()+" existing:"+exists);
-        
-        if (exists) {
-            try {
-            	lastModified = file.lastModified();
-            	
-                BibtexParser parser =
-                    new BibtexParser(
-                        new BufferedReader(
-                            new FileReader(file)));
 
-                parser.parse();
+		exists = file.exists();
 
-                if (getFieldCount() == 0) {
+		System.out.println(
+			"trying to (re)load bib file: "
+				+ file.getAbsoluteFile()
+				+ " existing:"
+				+ exists);
 
-                    for (int i = 0;
-                        i < parser.fieldNames.size();
-                        i++) {
-                        String name =
-                            (
-                                String) parser
-                                    .fieldNames
-                                    .elementAt(
-                                i);
+		if (exists) {
+			try {
+				lastModified = file.lastModified();
 
-                        addField(name, DbField.STRING);
-                    }
+				org.kobjects.bibtex.BibtexParser parser =
+					new org.kobjects.bibtex.BibtexParser(
+						new BufferedReader(new FileReader(file)));
 
-				
+				if (getFieldCount() == 0) {
 
-                    for (int i = 0;
-                        i < DEFAULT_FIELDS.length;
-                        i++) {
-                        if (findField(DEFAULT_FIELDS[i]) <= 0)
-                            addField(
-                                DEFAULT_FIELDS[i],
-                                DbField.STRING);
-                    }
-                    
-					setIdField (findField("id"));
+					for (int i = 0; i < DEFAULT_FIELDS.length; i++) {
+						if (findField(DEFAULT_FIELDS[i]) <= 0)
+							addField(DEFAULT_FIELDS[i], DbField.STRING);
+					}
+
+					setIdField(findField("id"));
 					keyIndex = findField("key");
-                    
-					fileIndex = getFieldCount();                    
-                    addField("pdfFile", DbField.BINARY);                    
-                }
 
-                // ensure equal record sizes
+					fileIndex = getFieldCount();
+					addField("pdfFile", DbField.BINARY);
+				}
 
-                for (int i = 0;
-                    i < parser.entries.size();
-                    i++) {
+				int fields = getFieldCount();
+				int lastInc = 0;
 
-                    Object[] r =
-                        (Object[]) parser.entries.elementAt(i);
+				while (true) {
+					Hashtable entry = parser.nextEntry();
+					Object[] dst = new Object[fields];
+					if (entry == null)
+						break;
+					for (Enumeration e = entry.keys(); e.hasMoreElements();) {
+						String name = (String) e.nextElement();
 
-                    if (r.length < fileIndex) {
-                        Object[] n = new Object[fileIndex];
-                        for (int j = 0; j < r.length; j++)
-                            n[j] = r[j];
+						int i = findField(name);
+						if (i <= 0) {
+							addField(name, DbField.STRING).getNumber();
+							fields++;
+							Object[] tmp = new Object[fields];
+							System.arraycopy(dst, 0, tmp, 0, dst.length);
+							dst = tmp;
+							lastInc = records.size();
+						}
+						dst[i - 1] = entry.get(name);
+					}
+					records.addElement(dst);
+				}
 
-                        r = n;
-                    }
+				// ensure equal record sizes
 
-                    if (r[idField-1] == null) {
-                        r[idField-1] = generateId();
-                    }
+				for (int i = 0; i < lastInc; i++) {
 
-                    rNew.addElement(r);
+					Object[] r = (Object[]) records.elementAt(i);
+					Object[] s = new Object[fields];
 
-                    iNew.put(r[idField-1], new Integer(i));
-                }
+					System.arraycopy(r, 0, s, 0, r.length);
+					records.setElementAt(s, i);
+				}
+			} catch (IOException e) {
+				throw new DbException(e.toString());
+			}
+		}
 
-                records = rNew;
-                index = iNew;
+	}
 
-            }
-            catch (IOException e) {
-                throw new DbException(e.toString());
-            }
-        }
-
-    }
-
-    public void connect(String connector) throws DbException {
-        filename =
-            connector.substring(connector.indexOf(':') + 1);
+	public void connect(String connector) throws DbException {
+		filename = connector.substring(connector.indexOf(':') + 1);
 
 		documentDir = null;
-		
+
 		int cut = filename.indexOf(";");
 		if (cut != -1) {
-			documentDir	= filename.substring(cut+1);
-			filename = filename.substring(0, cut);	
+			documentDir = filename.substring(cut + 1);
+			filename = filename.substring(0, cut);
 		}
+
+		reload();
+	}
+
+	public void open() throws DbException {
+		super.open();
+		new Thread(this).start();
+	}
+
+	public void run() {
+		while (open) {
+			try {
+				Thread.sleep(15000);
+				if (modified)
+					rewrite();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	protected void update(int i, Object[] entry) throws DbException {
+		if (entry[idField] == null)
+			entry[idField] = generateId();
+		super.update(i, entry);
 		
-        reload ();
+		modified = true;
+	}
 
-    }
+	protected void writeEntry(BufferedWriter w, Object[] entry)
+		throws IOException {
+			
+		BibtexWriter bw = new BibtexWriter(w);
 
-    public void open() throws DbException {
-        super.open();
-        new Thread(this).start();
-    }
+		bw.startEntry((String) entry[0], (String) entry[1]);
+		for (int j = 2; j < entry.length; j++) {
+			if (entry[j] == null || "".equals(entry[j]))
+				continue;
+			bw.writeField(getField(j).getName(), entry[j].toString());
+		}
+	}
 
-    public void run() {
-        while (open) {
-            try {
-                Thread.sleep(15000);
-                if (modified)
-                    rewrite();
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
+	public synchronized void rewrite() throws DbException {
+		System.out.println("BibtexTable: rewrite() triggered");
+		try {
+			File nf = new File(filename + ".new");
+			BufferedWriter w = new BufferedWriter(new FileWriter(nf));
+			for (int i = 0; i < records.size(); i++) {
+				writeEntry(w, (Object[]) records.elementAt(i));
+			}
+			w.close();
 
-        }
-    }
+			new File(filename + ".bak").delete();
+			new File(filename).renameTo(new File(filename + ".bak"));
+			nf.renameTo(new File(filename));
 
-    protected void update(int i, Object[] entry)
-        throws DbException {
-        if (entry[idField] == null)
-            entry[idField] = generateId();
-        super.update(i, entry);
-    }
+			modified = false;
+		} catch (IOException e) {
+			throw new DbException("" + e);
+		}
+		System.out.println("BibtexTable: rewrite() finished");
+	}
 
-    protected void writeEntry(BufferedWriter w, Object[] entry)
-        throws IOException {
+	public void close() throws DbException {
+		if (modified) {
+			rewrite();
+		}
+		super.close();
+	}
 
-        w.write("@" + entry[0] + "{" + entry[1]);
-        for (int j = 2; j < entry.length; j++) {
-            if (entry[j] == null || "".equals(entry[j]))
-                continue;
-            w.write(',');
-            w.newLine();
-            w.write("  " + getField(j).getName() + " = ");
-            String e = entry[j].toString();
-            for (int k = 0; k < e.length(); k++) {
-                char c = e.charAt(k);
-                if ((c < '0' || c > '9')
-                    && (c < 'a' || c > 'z')
-                    && (c < 'A' || c > 'Z')) {
-                    e = "{" + e + "}";
-                    break;
-                }
-            }
-            w.write(e);
-        }
-        w.newLine();
-        w.write('}');
-        w.newLine();
-        w.newLine();
-        w.newLine();
+	protected RamRecord getRecords(Vector selected, int[] fields) {
+		return new BibtexRecord(this, selected, fields);
+	}
 
-    }
-
-    public synchronized void rewrite() throws DbException {
-        System.out.println("BibtexTable: rewrite() triggered");
-        try {
-            File nf = new File(filename + ".new");
-            BufferedWriter w =
-                new BufferedWriter(new FileWriter(nf));
-            for (int i = 0; i < records.size(); i++) {
-                writeEntry(w, (Object[]) records.elementAt(i));
-            }
-            w.close();
-
-            new File(filename + ".bak").delete();
-            new File(filename).renameTo(
-                new File(filename + ".bak"));
-            nf.renameTo(new File(filename));
-
-            modified = false;
-        }
-        catch (IOException e) {
-            throw new DbException("" + e);
-        }
-        System.out.println("BibtexTable: rewrite() finished");
-    }
-
-    public void close() throws DbException {
-        if (modified) {
-            rewrite();
-        }
-        super.close();
-    }
-
-    protected RamRecord getRecords(Vector selected, int[] fields) {
-        return new BibtexRecord(this, selected, fields);
-    }
-
-    /*
-    	public static void main(String argv[]) throws DbException {
-    
-    		DbTable table = DbManager.connect("bibtex:" + argv[0]);
-    
-    		table.open();
-    
-    		DbRecord r = table.select(false);
-    
-    		while (r.hasNext()) {
-    			r.next();
-    
-    			System.out.println(r.getId());
-    		}
-    	}
-    */
+	/*
+		public static void main(String argv[]) throws DbException {
+	
+			DbTable table = DbManager.connect("bibtex:" + argv[0]);
+	
+			table.open();
+	
+			DbRecord r = table.select(false);
+	
+			while (r.hasNext()) {
+				r.next();
+	
+				System.out.println(r.getId());
+			}
+		}
+	*/
 }

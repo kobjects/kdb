@@ -15,6 +15,7 @@ import java.net.*;
 public class BibtexTable extends RamTable implements Runnable {
 
     protected String filename;
+    protected String documentDir;
     protected long lastModified;
     
     static final String[] DEFAULT_FIELDS =
@@ -122,6 +123,9 @@ public class BibtexTable extends RamTable implements Runnable {
                                 DEFAULT_FIELDS[i],
                                 DbField.STRING);
                     }
+                    
+                    addField("pdfFile", DbField.BINARY);
+                    
                 }
 
                 // ensure equal record sizes
@@ -164,6 +168,15 @@ public class BibtexTable extends RamTable implements Runnable {
     public void connect(String connector) throws DbException {
         filename =
             connector.substring(connector.indexOf(':') + 1);
+
+		documentDir = null;
+		
+		int cut = filename.indexOf(";");
+		if (cut != -1) {
+			documentDir	= filename.substring(cut+1);
+			filename = filename.substring(0, cut);	
+		}
+		
         reload ();
 
     }

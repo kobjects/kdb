@@ -87,7 +87,7 @@ public class RecordNode extends AbstractRecordNode {
 
     public void statistics () {
 	try {
-	    add (new StatsNode (this, dbTable, query), true);
+	    add (new StatsNode (this, dbTable, fields, query), true);
 	}
 	catch (Exception e) {
 	    TableBrowser.error (e, null);

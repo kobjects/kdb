@@ -20,10 +20,10 @@ class StatsNode extends AbstractRecordNode {
     JTable jTable = new JTable ();
     FieldStatistics [] stats;
 
-    StatsNode (AbstractNode parent, 
-	       DbTable dbTable, String query) throws DbException {
+    StatsNode (AbstractNode parent, DbTable dbTable, 
+    		int[] fields, String query) throws DbException {
 
-	super (parent, dbTable, query);
+	super (parent, dbTable, fields, query, -1, false);
 	
 	stats = FieldStatistics.generate (record);
 	jTable.setModel (new DbMetaTableModel (dbTable, stats));

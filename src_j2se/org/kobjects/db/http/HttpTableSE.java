@@ -138,7 +138,7 @@ public class HttpTableSE implements DbTable {
 	}
 
 	public DbRecord select (boolean update) throws DbException {
-		return select (null, -1, false, update);
+		return select (null, null, -1, false, update);
 	}
 	
 	
@@ -187,6 +187,7 @@ public class HttpTableSE implements DbTable {
 	}
 
 	public DbRecord select (
+		int [] fields,
 		DbCondition condition,
 		int sortfield,
 		boolean inverse,
@@ -194,6 +195,9 @@ public class HttpTableSE implements DbTable {
 		throws DbException {
 			
 		try {			
+			if (fields != null) throw new RuntimeException ("fields param NYI");
+			
+			
 			HttpURLConnection connection =
 				(HttpURLConnection) new URL(url + conjunction + "cmd=select" 
 				    + (condition != null 

@@ -99,7 +99,7 @@ public class TableNode extends AbstractNode {
 
     public void statistics () {
 	try {
-	    add (new StatsNode (this, dbTable, ""), true);
+	    add (new StatsNode (this, dbTable, null, ""), true);
 	}
 	catch (Exception e) {
 	    TableBrowser.error (e, null);

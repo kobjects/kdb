@@ -64,6 +64,10 @@ public class HttpRecord implements DbRecord {
 		return (byte[]) getObject(column);
 	}
 
+	public int [] getSelectedFields() {
+		return null;
+	}
+
 	public boolean isDeleted() {
 		return deleted;
 	}

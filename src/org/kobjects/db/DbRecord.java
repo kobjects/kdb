@@ -37,8 +37,6 @@ import javax.microedition.rms.*;
  */
 public interface DbRecord {
 
-    public void clear();
-
     public Object getObject(int column);
 
     public void setObject(int column, Object value);
@@ -99,20 +97,21 @@ public interface DbRecord {
     /**
      * Resets the iterator before the first row.
      */
-    public void reset() throws DbException;
+    public void beforeFirst() throws DbException;
 
     /**
      * Queries whether the is a next element in this result set.
      */
-    public boolean hasNextElement();
+    public boolean hasNext();
 
     /**
      * Proceeds to the next element in this result set, returning its record ID.
      */
-    public Object nextElement() throws DbException;
+    public void next() throws DbException;
 
     /**
-     * Returns the total number of rows.
+     * Returns the total number of rows. Influences by update(), insert() and
+     * delete(), in case the Record is kept updated.
      */
     public int getRowCount();
 

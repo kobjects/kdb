@@ -18,13 +18,7 @@ public class DbException extends Exception {
     }
 
     public DbException(String message, Exception chained) {
-        super(message);
+        super(message + " (" + chained + ")");
         this.chained = chained;
-    }
-
-    public String toString() {
-        String msg = super.toString();
-        if (chained != null) msg = msg + " (" + chained.toString() + ")";
-        return msg;
     }
 }

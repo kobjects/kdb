@@ -117,7 +117,6 @@ public class DbField {
      * created using the table's <code>addField()</code> factory
      * method.
      */
-
     public DbField(DbTable table, int number, String name, int type) {
         this.table = table;
         this.number = number;

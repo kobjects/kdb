@@ -11,7 +11,7 @@ public class HttpTableSE implements DbTable {
 
 	String url;
 	String name;
-	Vector fields;
+	Vector fields = new Vector ();
 	int [] idFields;
 	char conjunction;
 	boolean exists;
@@ -44,6 +44,7 @@ public class HttpTableSE implements DbTable {
 
 	public void connect(String connector) throws DbException {
 
+		url = connector;
 		conjunction = connector.indexOf ('?') == -1 ? '?' : '&';
 
 		try {
@@ -61,22 +62,25 @@ public class HttpTableSE implements DbTable {
 				addField(f[0], Field.STRING);
 			}
 
-			/*
+			// determine primaryKey			
 			connection =
-				(HttpURLConnection) new URL(url + "?from=" + name).openConnection();
+				(HttpURLConnection) new URL(url + conjunction + "cmd=primaryKey").openConnection();
 
 			is = connection.getInputStream();
 			reader = new BufferedReader(new InputStreamReader(is));
 
-			while (true) {
-				String line = reader.readLine();
-				if (line == null)
-					break;
-				allRecords.addElement(Csv.decode(line));
-			}*/
+			String line = reader.readLine();
+			if (line == null) 
+				throw new DbException ("no primary key!?!");
+			else {
+  				String key = Csv.decode(line) [0];
+  				int index = findField (key);
+  				System.out.println ("id field is: "+key+" index: "+index);
+  				setIdFields (new int [] {index});	
+			}
 			exists = true;
 			
-		} catch (Exception e) {
+		} catch (IOException e) {
 			throw new DbException(e.toString (), e);
 		}
 	}
@@ -133,23 +137,77 @@ public class HttpTableSE implements DbTable {
 		return fields.size();
 	}
 
-	public DbRecord select (boolean update) {
-		throw new RuntimeException ("NYI");
+	public DbRecord select (boolean update) throws DbException {
+		return select (null, -1, false, update);
 	}
 	
 	
-	public DbRecord select (Object id) {
-		throw new RuntimeException ("NYI");
+	public DbRecord select (Object id) throws DbException {
+		try {			
+		    StringBuffer where = new StringBuffer (getField (idFields [0]).getName ());
+
+		    for (int i = 1; i < idFields.length; i++) {
+				where.append ("+");
+				where.append (getField (idFields [i]).getName ());		        
+		    }
+		    
+			HttpURLConnection connection =
+				(HttpURLConnection) new URL(url + conjunction + "cmd=select&where="+where+"="+id).openConnection();
+
+			InputStream is = connection.getInputStream();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+
+			Vector selected = new Vector ();
+
+			while (true) {
+				String line = reader.readLine();
+				if (line == null)
+					break;
+				selected.addElement (Csv.decode(line));
+			}
+
+			is.close ();
+			//connection.close ();
+
+			return new HttpRecord (this, selected);			
+		}
+		catch (IOException e) {
+			throw new DbException (e.toString (), e);
+		}
 	}
 
-	public DbRecord select(
+
+	public DbRecord select (
 		DbCondition condition,
 		int sortfield,
 		boolean inverse,
 		boolean updated)
 		throws DbException {
 			
-		throw new RuntimeException ("NYI");
+		try {			
+			HttpURLConnection connection =
+				(HttpURLConnection) new URL(url + conjunction + "cmd=select").openConnection();
+
+			InputStream is = connection.getInputStream();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+
+			Vector selected = new Vector ();
+
+			while (true) {
+				String line = reader.readLine();
+				if (line == null)
+					break;
+				selected.addElement (Csv.decode(line));
+			}
+
+			is.close ();
+			//connection.close ();
+			
+			return new HttpRecord (this, selected);
+		}
+		catch (IOException e) {
+			throw new DbException (e.toString (), e);
+		}
 	}
 
 	public void setIdFields(int[] idFields) throws DbException {

@@ -39,9 +39,12 @@ public class DbManager {
             int p = connector.indexOf(':');
             String type = connector.substring(0, p);
             if ("https".equals(type)) type = "http";
-            String name = Character.toUpperCase(type.charAt(0)) + type.substring(1);
+            String name = Character.toUpperCase(type.charAt(0)) + type.substring(1) + "Table";
 
-            table = (DbTable)Class.forName("org.kobjects.db." + type + "." + name + "Table").newInstance();
+			// hack; I'll change this back asap
+			if ("http".equals (type)) name = name + "SE";
+
+            table = (DbTable)Class.forName("org.kobjects.db." + type + "." + name).newInstance();
         }
         catch (Exception e) {
             throw new DbException("Can't connect to table \"" + connector + "\"", e);

@@ -103,6 +103,9 @@ public class DbCondition {
      */
     private DbCondition[] children;
 
+
+	private DbTable table;
+
     /**
      * Creates a new Condition node for a relation between a field (given by its
      * number) and a value. The operator must be one of LT, GT, LE, GE, EQ, NE,
@@ -139,6 +142,7 @@ public class DbCondition {
      * Assigns this condition a table.
      */
     public void setTable(DbTable table) {
+		this.table = table;
         if (operator >= AND) {
             for (int i = 0; i < children.length; i++) {
                 children[i].setTable(table);
@@ -218,4 +222,43 @@ public class DbCondition {
 
         return false; // To make compiler happy
     }
+    
+    
+    
+    public String toString () {
+
+        if (operator < AND) {
+            String f = field == -1 ? "#id" : table.getField (field).getName ();
+
+            switch (operator) {
+                case LT: return f + " < " + value;
+                case GT: return f + " > " + value;
+                case LE: return f + " <= " + value;
+                case GE: return f + " >= " + value;
+                case EQ: return f + " == " + value;
+                case NE: return f + " != " + value;
+                case EQ_TEXT: return f + " = " + value;
+			    default: throw new RuntimeException ("illegal operator: "+operator);
+            }
+        }
+        else if (operator == NOT) {
+			return "NOT("+children [0]+")";            
+        }
+        else {
+            StringBuffer buf = new StringBuffer ("(");
+            buf.append (children [0].toString ());
+			for (int i = 1; i < children.length; i ++) {
+			    switch (operator) {
+			    case AND: buf.append (" AND "); break;
+			    case OR: buf.append (" OR "); break;
+			    case XOR: buf.append (" XOR "); break;
+			    default: throw new RuntimeException ("illegal operator: "+operator);
+		    	}
+				buf.append (children [i].toString ());
+			}
+			buf.append (")");			
+			return buf.toString ();
+	    }
+    }
+    
 }

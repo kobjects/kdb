@@ -11,11 +11,11 @@ public class RamTable implements DbTable {
 
     protected Vector fields = new Vector();
     protected Vector records = new Vector();
-    protected Hashtable index;
+//    protected Hashtable index;
     protected boolean open;
     protected boolean exists;
     protected boolean modified;
-    protected int idField = -1;
+//    protected int idField = -1;
 
     public void connect(String connector) throws DbException {
     }
@@ -82,7 +82,7 @@ public class RamTable implements DbTable {
     }
 
     public int getIdField() {
-        return idField;
+        return -1;
     }
 
     public DbField getField(int index) {
@@ -94,24 +94,28 @@ public class RamTable implements DbTable {
     }
     
     
+    public int getPhysicalFieldCount() {
+    	return getFieldCount();
+    }
+    
     /** 
      * Overwrites the fields of the existing object with contents of the given entry */
     
-    protected void update(int i, Object[] entry) throws DbException {
+    protected void update(int row, Object[] entry) throws DbException {
     	
     	if (entry == null) {
-    		records.setElementAt (null, i);
+    		records.setElementAt (null, row-1);
     		return;
     	}
     	
-    	Object[] rec = i == INSERT_ROW ? new Object[entry.length] : ((Object []) records.elementAt(i));
+    	Object[] rec = row == INSERT_ROW ? new Object[entry.length] : ((Object []) records.elementAt(row));
 
 		System.arraycopy (entry, 0, rec, 0, entry.length);
     	
-    	if (i == INSERT_ROW) {
-    		if (idField > 0) 
+    	if (row == INSERT_ROW) {
+/*    		if (idField > 0) 
 	    		index.put (entry[idField], new Integer(records.size()));
-	    		
+*/	    		
     		records.addElement(rec);
     	}
 
@@ -156,11 +160,13 @@ public class RamTable implements DbTable {
 	}
 
 
+/*
     public void setIdField(int idField) throws DbException {
 
         checkOpen(false);
         this.idField = idField;
         index = new Hashtable();
     }
+*/
 
 }

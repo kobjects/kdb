@@ -29,14 +29,14 @@ public class BibtexRecord extends RamRecord {
 
 	public Object getObject (int index)  {
 		DbField field = getField(index);
-		if (field.getNumber() < table.fileFields) 
+		if (field.getNumber() <= table.physicalFields) 
 			return super.getObject(index);
 
 		try {
 			
 			File file = new File 
 				(table.documentDir, 
-				 values[table.keyField-1]
+				 values[table.KEY_INDEX]
 				 +"."
 				 +field.getName().substring (0, 3));
 			

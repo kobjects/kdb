@@ -8,21 +8,26 @@ import java.io.*;
 import javax.swing.*;
 import javax.swing.tree.*;
 
+import org.kobjects.swing.*;
 import org.kobjects.db.*;
 import org.kobjects.db.statistics.*;
 import org.kobjects.db.swing.*;
 
 
-class RecordNode extends AbstractRecordNode {
+public class RecordNode extends AbstractRecordNode {
 
     JPanel panel = new JPanel (new BorderLayout ());
     JTextField refineField = new JTextField ();
     JTable metaTable;
 
-    RecordNode (AbstractNode parent, DbTable dbTable, 
-		String query) throws DbException {
+    RecordNode (AbstractNode parent, 
+		DbTable dbTable, 
+		int [] fields,
+		String query,
+		int order,
+		boolean inverse) throws DbException {
 
-	super (parent, dbTable, query);
+	super (parent, dbTable, fields, query, order, inverse);
 
 	JTable table = new JTable (new DbTableModel (record));
 	table.setAutoResizeMode (JTable.AUTO_RESIZE_OFF);
@@ -40,7 +45,7 @@ class RecordNode extends AbstractRecordNode {
 	buttons.add (new JButton (new InvokeAction 
 	    ("statistics", this, "statistics")));
 	buttons.add (new JButton (new InvokeAction 
-	    ("close", this, "close")));
+	    ("close", this, "remove")));
 
 	Box bottom = new Box (BoxLayout.Y_AXIS);	
 	bottom.add (refine);
@@ -66,9 +71,13 @@ class RecordNode extends AbstractRecordNode {
 
 	try {
 	    add (new RecordNode (this, 
-				 dbTable, "(" + query 
+				 dbTable,
+				 fields,
+				 "(" + query 
 				 + ") AND (" + refinement
-				 +")"), true);    
+				 +")",
+				 order,
+				 inverse), true);    
 	}
 	catch (Exception e) {
 	    TableBrowser.error (e, null);

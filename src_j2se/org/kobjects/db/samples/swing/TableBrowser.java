@@ -6,16 +6,18 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.tree.*;
+
+import org.kobjects.swing.*;
 import org.kobjects.db.*;
 import org.kobjects.db.swing.*;
 
 
-public class TableBrowser extends JFrame implements TreeSelectionListener {
+public class TableBrowser extends JFrame {
+
 
     RootNode rootNode = new RootNode (this);
-    JSplitPane splitPane = new JSplitPane (JSplitPane.HORIZONTAL_SPLIT);
-    JTree tree = new JTree (rootNode);
-    Component current = rootNode.getComponent ();
+    
+    
 
     TableBrowser () {
 
@@ -23,16 +25,13 @@ public class TableBrowser extends JFrame implements TreeSelectionListener {
 
 	addWindowListener (new WindowAdapter () {
 		public void windowClosing (WindowEvent e) {
-		    rootNode.close ();
+		    rootNode.remove ();
 		    System.exit (0);
 		}
 	    });
 
-	getContentPane ().add (splitPane, BorderLayout.CENTER);
-	splitPane.setLeftComponent (new JScrollPane (tree));
-	splitPane.setRightComponent (current);
-
-	tree.addTreeSelectionListener (this);
+	getContentPane ().add (new TreePane (rootNode), 
+			       BorderLayout.CENTER);
 
 	pack ();
 	show ();
@@ -62,19 +61,7 @@ public class TableBrowser extends JFrame implements TreeSelectionListener {
     }
 
 
-    public void valueChanged (TreeSelectionEvent e) {
-
-	AbstractNode node = (AbstractNode) e.getPath ().getLastPathComponent ();
-
-	current = node.getComponent ();
-	setTitle (node.toString ());
-	int l = splitPane.getDividerLocation ();
-	splitPane.setRightComponent (current);
-	splitPane.setDividerLocation (l);
-	//	root.add (current, BorderLayout.CENTER);
-	//root.validate ();
-	//current.repaint ();
-    }
+   
 
     public static void main (String [] argv) {
 	TableBrowser tb = new TableBrowser ();

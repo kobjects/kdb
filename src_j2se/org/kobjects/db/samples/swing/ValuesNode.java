@@ -5,6 +5,9 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.*;
 
+import org.kobjects.swing.*;
+
+
 class ValuesNode extends AbstractNode {
 
     JPanel panel = new JPanel (new BorderLayout ());
@@ -26,7 +29,7 @@ class ValuesNode extends AbstractNode {
 	
 	Box buttons = new Box (BoxLayout.X_AXIS);
 	buttons.add (Box.createGlue ());
-	buttons.add (new JButton (new InvokeAction ("close", this)));
+	buttons.add (new JButton (new InvokeAction ("close", this, "remove")));
     }
 
 

@@ -8,6 +8,7 @@ import java.io.*;
 import javax.swing.*;
 import javax.swing.tree.*;
 
+import org.kobjects.swing.*;
 import org.kobjects.db.*;
 import org.kobjects.db.statistics.*;
 import org.kobjects.db.swing.*;
@@ -30,7 +31,7 @@ class StatsNode extends AbstractRecordNode {
 	panel.add (new JScrollPane (jTable), BorderLayout.CENTER);
 	Box buttons = new Box (BoxLayout.X_AXIS);
 	buttons.add (Box.createGlue ());
-	buttons.add (new JButton (new InvokeAction ("close", this, "close")));
+	buttons.add (new JButton (new InvokeAction ("close", this, "remove")));
 	panel.add (buttons, BorderLayout.SOUTH);
 
 	for (int i = 0; i < stats.length; i++) {
@@ -45,7 +46,7 @@ class StatsNode extends AbstractRecordNode {
     }
 
     public String toString () {
-	return "Stats for "+ parent;
+	return "Stats for "+ getParent ();
     }
 
 }

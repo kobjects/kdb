@@ -22,9 +22,6 @@ package org.kobjects.db;
 
    - darf refresh aufgerufen werden falls modified? -> Cancel
    - insert: next?!?!, insbes. bei einzelnem record
-   - IMHO sollte statt insert besser "createRecord" in der tabelle
-     sein (aber erst wirklich ausgef. wenn update aufgerufen wird.
-
  */
 
 import java.io.*;
@@ -32,9 +29,12 @@ import java.util.*;
 //import javax.microedition.rms.*;
 
 /**
- * Represents a record in a table. Actually, this class resembles an SQL result
- * set more than a record.
- */
+ * Represents a record in a table. Actually, this class resembles an
+ * SQL result set more than a record. However, there are a few
+ * differences: The indices always correspond to the column indices of
+ * the original table. Also, there are separate next and hasNext
+ * methods.  */
+
 public interface DbRecord {
 
     public Object getObject(int column);
@@ -121,7 +121,7 @@ public interface DbRecord {
     public int getRow();
 
     /**
-     * Jumps to a given row.
+     * Jumps to a given row. Please note: Row counting starts with 1
      */
     public void absolute(int row) throws DbException;
 
@@ -129,4 +129,10 @@ public interface DbRecord {
      * Throws away the record and all resources it has reserved.
      */
     public void dispose();
+
+    /** 
+     * returns an int array containing the selected field
+     * indices, or null, if all fields are selected */
+
+    public int [] getSelectedFields ();
 }

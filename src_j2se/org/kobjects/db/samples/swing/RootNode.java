@@ -8,6 +8,7 @@ import java.io.*;
 import javax.swing.*;
 import javax.swing.tree.*;
 
+import org.kobjects.swing.*;
 import org.kobjects.db.*;
 import org.kobjects.db.swing.*;
 

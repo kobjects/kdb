@@ -8,12 +8,13 @@ import java.io.*;
 import javax.swing.*;
 import javax.swing.tree.*;
 
+import org.kobjects.swing.*;
 import org.kobjects.db.*;
 import org.kobjects.db.sql.*;
 import org.kobjects.db.swing.*;
 
 
-class TableNode extends AbstractNode {
+public class TableNode extends AbstractNode {
 
     DbTable dbTable;
     String connector;
@@ -21,6 +22,9 @@ class TableNode extends AbstractNode {
     JPanel panel = new JPanel (new GridBagLayout ());
     JTextField queryField = new JTextField (40);
 
+    int [] fields;
+    int order = -1;
+    boolean inverse;
     
     TableNode (AbstractNode parent, DbTable table, String connector) {
 	super (parent, true);
@@ -54,19 +58,38 @@ class TableNode extends AbstractNode {
 	buttons.add (new JButton (new InvokeAction 
 	    ("select", this, "query")));	
 	buttons.add (new JButton (new InvokeAction 
+	    ("dialog", this, "selectDialog")));
+	buttons.add (new JButton (new InvokeAction 
 	    ("statistics", this, "statistics")));	
 	buttons.add (new JButton (new InvokeAction 
-	    ("close", this, "close")));
+	    ("close", this, "remove")));
 
 	c.gridy++;
         panel.add (buttons, c);
     }
 
+
+    public void selectDialog () {
+	SelectComponent sc = new SelectComponent 
+	    (dbTable, SelectComponent.CONDITION 
+	     | SelectComponent.FIELDS | SelectComponent.ORDER);
+
+	if (sc.showDialog (panel)) {
+	    queryField.setText (sc.getCondition ());
+	    fields = sc.getFields ();
+	    order = sc.getOrder ();
+	    inverse = sc.getInverse ();
+	}
+    }
 		     
     public void query () {
 	try {
-	    add (new RecordNode (this, dbTable, 
-				 queryField.getText ()), true);
+	    add (new RecordNode (this, 
+				 dbTable, 
+				 fields, 
+				 queryField.getText (), 
+				 order, 
+				 inverse), true);
 	}
 	catch (Exception e) {
 	    TableBrowser.error (e, "error processing query: "
@@ -83,8 +106,8 @@ class TableNode extends AbstractNode {
 	}
     }
 
-    public void close () {
-	super.close ();
+    public void remove () {
+	super.remove ();
 	try {
 	    dbTable.close ();
 	}

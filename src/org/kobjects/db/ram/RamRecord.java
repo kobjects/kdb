@@ -14,11 +14,12 @@ class RamRecord implements DbRecord {
     Object[] values;
     boolean modified;
     boolean deleted;
+    int [] selectedFields;
 
-
-    RamRecord (RamTable table, Vector selection) {
+    RamRecord (RamTable table, Vector selection, int [] selectedFields) {
 	this.table = table;
         this.selection = selection;
+	this.selectedFields = selectedFields;
         values = new Object [table.getFieldCount ()];
     }
 
@@ -39,7 +40,15 @@ class RamRecord implements DbRecord {
 
 
     public Object getObject(int column) {
-        return values[column];
+	if (selectedFields == null) 
+	    return values[column];
+       
+	for (int i = 0; i < selectedFields.length; i++) 
+	    if (selectedFields [i] == column)   
+		return values[column];
+	
+	throw new IllegalArgumentException 
+	    ("Field "+column+ " not in selection!");
     }
 
 
@@ -66,6 +75,10 @@ class RamRecord implements DbRecord {
         return selection.size ();
     }
 
+
+    public int[] getSelectedFields () {
+	return selectedFields;
+    }
 
     public String getString(int column) {
         Object o = getObject(column);

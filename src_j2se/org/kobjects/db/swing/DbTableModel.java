@@ -8,9 +8,17 @@ import org.kobjects.util.*;
 public class DbTableModel extends AbstractTableModel {
 
     DbRecord record;
+    int [] indices;
 
     public DbTableModel (DbRecord record) {
 	this.record = record;
+	if (record.getSelectedFields () != null)
+	    indices = record.getSelectedFields ();
+	else {
+	    indices = new int [record.getTable ().getFieldCount ()]; 
+	    for (int i = 0; i < indices.length; i++) 
+		indices [i] = i;
+	}
     }
 
     public int getRowCount () {
@@ -25,7 +33,8 @@ public class DbTableModel extends AbstractTableModel {
 
     public int getColumnCount () {
 	//	try {
-	return record.getTable ().getFieldCount ();
+	return indices.length;
+	
 	//}
 	//catch (DbException e) {
 	//    throw ChainedRuntimeException.create (e, null);
@@ -33,7 +42,7 @@ public class DbTableModel extends AbstractTableModel {
     }
 
     public Class getColumnClass (int column) {
-	switch (record.getTable ().getField (column).getType ()) {
+	switch (record.getTable ().getField (indices[column]).getType ()) {
 	case DbField.STRING: return String.class;
 	case DbField.INTEGER: return Integer.class;
 	case DbField.LONG: return Long.class;
@@ -47,13 +56,13 @@ public class DbTableModel extends AbstractTableModel {
     }
 
     public String getColumnName (int column) {
-	return record.getTable ().getField (column).getName ();
+	return record.getTable ().getField (indices[column]).getName ();
     }
 
     public Object getValueAt (int row, int column) {
 	try {
 	    record.absolute (row+1);
-	    return record.getObject (column);
+	    return record.getObject (indices[column]);
 	}
 	catch (DbException e) {
 	    throw ChainedRuntimeException.create (e, null);
@@ -67,7 +76,7 @@ public class DbTableModel extends AbstractTableModel {
     public void setValueAt (Object value, int row, int column) {
 	try {
 	    record.absolute (row+1);
-	    record.setObject (column, value);
+	    record.setObject (indices[column], value);
 	    record.update ();
 	}
 	catch (DbException e) {

@@ -98,15 +98,22 @@ public interface DbTable {
     public DbRecord select(Object id) throws DbException;
 
     /**
-     * Select all records for which the given condition evaluates to
-     * true. If the given orderField is a valid field number, the result set
-     * is sorted according to that field. If the orderField is -1, the result
-     * set is sorted according to the records' IDs. The order can be reversed
-     * using the correspoding parameter. The last parameter decides whether the
-     * whole result set is kept updated or not. The returned result set is
-     * positioned before the first record.
-     */
-    public DbRecord select(DbCondition filter, int oderBy, boolean reverse, boolean updated) throws DbException;
+     * Select the given field indices from all records for which the
+     * given condition evaluates to true. If the given orderField is a
+     * valid field number, the result set is sorted according to that
+     * field. If the orderField is -1, the result set is sorted
+     * according to the records' IDs. The order can be reversed using
+     * the correspoding parameter. The last parameter decides whether
+     * the whole result set is kept updated or not. The returned
+     * result set is positioned before the first record.  */
+
+    public DbRecord select(int [] fields, DbCondition filter, 
+			   int oderBy, boolean reverse, 
+			   boolean updated) throws DbException;
 }
+
+
+
+
 
 

@@ -109,14 +109,15 @@ public class RamTable implements DbTable {
 
 		System.out.println ("select for id "+id+" size: "+selected.size ());
 
-		return new RamRecord(this, selected);
+		return new RamRecord(this, selected, null);
 	}
 
 	public DbRecord select(boolean updated) throws DbException {
-		return select(null, -1, false, updated);
+		return select(null, null, -1, false, updated);
 	}
 
 	public DbRecord select(
+			       int [] fields,			       
 		DbCondition condition,
 		int sortfield,
 		boolean inverse,
@@ -138,7 +139,7 @@ public class RamTable implements DbTable {
 		if (sortfield != -1 || updated)
 			throw new RuntimeException("NYI");
 
-		return new RamRecord(this, selected);
+		return new RamRecord(this, selected, fields);
 	}
 
 	public void setIdFields(int[] idFields) throws DbException {

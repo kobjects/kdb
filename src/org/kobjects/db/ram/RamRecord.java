@@ -208,7 +208,7 @@ class RamRecord implements DbRecord {
 
 
     public void dispose () {
-        throw new RuntimeException ("NYI");
+        //throw new RuntimeException ("NYI");
     }
 }
 

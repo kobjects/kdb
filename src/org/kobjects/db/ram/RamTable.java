@@ -7,12 +7,17 @@ import org.kobjects.db.*;
 
 public class RamTable extends DbTable {
 
+
+    // deleted records are marked by null values
     
     protected Vector fields;
     protected Vector records;
-    protected Hashtable index;
+    //    protected Hashtable index;
     protected boolean open;
     protected boolean exists;
+
+    protected int [] idFields;
+
 
     public void init (String connector) {
         //if (name != null) 
@@ -40,7 +45,6 @@ public class RamTable extends DbTable {
     public void close () {
         open = false;
         records = null;
-        index = null;
     }
 
 
@@ -70,8 +74,9 @@ public class RamTable extends DbTable {
 
 
     public DbRecord select (Object id) {
-        throw new RuntimeException ("NYI");
+	return new RamRecord (this, ((Integer) id).intValue ());
     }
+
 
     public DbRecord select (DbCondition condition, int sortfield, boolean inverse, boolean updated) {
         throw new RuntimeException ("NYI");

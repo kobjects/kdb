@@ -20,27 +20,34 @@ public abstract class DbTable {
     public abstract boolean exists();
 
     /**
-     * Factory method mit load by name? Braucht wohl zweite Methode zum
-     * connecten. Namensschema: Db<typ>Table, mit <typ> erster Buchstabe groﬂ, Rest
-     * klein.
-     */
+     * Factory method mit load by name? Braucht wohl zweite Methode
+     * zum connecten. Namensschema: Db<typ>Table, mit <typ> erster
+     * Buchstabe groﬂ, Rest klein.  */
+
     public static DbTable connect(String connector) throws DbException {
         DbTable table = null;
 
         try {
             int p = connector.indexOf(':');
             String proto = connector.substring(0, p);
-            String cls   = Character.toUpperCase(proto.charAt(0)) + proto.substring(1);
+            String cls   = Character.toUpperCase(proto.charAt(0)) 
+		+ proto.substring(1);
             if ("https".equals(cls)) cls = "http";
 
-            System.out.println(proto + " / " + cls + " org.kobjects.db." + proto + "." + cls + "Table");
+            System.out.println 
+		(proto + " / " + cls + " org.kobjects.db." 
+		 + proto + "." + cls + "Table");
 
-            table = (DbTable)Class.forName("org.kobjects.db." + proto + "." + cls + "Table").newInstance();
+            table = (DbTable)Class.forName
+		("org.kobjects.db." + proto 
+		 + "." + cls + "Table").newInstance();
         }
         catch (Exception e) {
-            throw new DbException("Can't connect to table \"" + connector + "\" (" + e.getClass().getName() + ")");
+            throw new DbException
+		("Can't connect to table \"" + connector 
+		 + "\" (" + e.getClass().getName() + ")");
         }
-
+	
         table.init(connector);
         return table;
     }
@@ -83,7 +90,14 @@ public abstract class DbTable {
          return select(null, -1, false, updated);
     }
 
+
+    /** Selects the record corresponding to the given ID. If the id
+        does not exist, null is returned In contrast to the select
+        methods returning more than one record, a call to
+        record.next() is neither neccessary nor allowed.  */
+
     public abstract DbRecord select (Object id) throws DbException;
+
 
     public abstract DbRecord select (DbCondition filter, int orderField, boolean orderReverse, boolean updated) throws DbException;
 }

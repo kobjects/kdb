@@ -17,21 +17,31 @@ package org.kobjects.db;
  *   absolute etc.
  * - Es fehlen: Get RowCount
  * - Sollte das nicht eher ein Interface sein?
+
+  unklare semantik: 
+
+   - darf refresh aufgerufen werden falls modified?
+   - insert: next?!?!, insbes. bei einzelnem record
+   - IMHO sollte statt insert besser "createRecord" in der tabelle
+     sein (aber erst wirklich ausgef. wenn update aufgerufen wird.
+
  */
+
+
+
 import java.io.*;
 import java.util.*;
 import javax.microedition.rms.*;
 
 public abstract class DbRecord {
 
-    protected DbTable table;
 
     protected Object[] values;
-
     protected boolean modified;
 
+
     public void clear() {
-        values = new Object[table.getFieldCount()];
+        values = new Object[getTable().getFieldCount()];
         modified = true;
     }
 
@@ -106,7 +116,9 @@ public abstract class DbRecord {
     public void insert() throws DbException {
         modified = true;
 
-        for (int i = 0; i < table.getFieldCount(); i++) {
+	DbTable table = getTable ();
+	int cnt = table.getFieldCount ();
+        for (int i = 0; i < cnt; i++) {
             values[i] = table.getField(i).getDefault();
         }
     }
@@ -129,9 +141,7 @@ public abstract class DbRecord {
     }
 
 
-    public DbTable getTable() {
-        return table;
-    }
+    public abstract DbTable getTable();
 
 
     public abstract Object getId();
@@ -143,7 +153,7 @@ public abstract class DbRecord {
     public abstract void next() throws DbException;
 
 
-    public abstract void reset ();
+    public abstract void reset () throws DbException;
 
 
     public void absolute(int position) throws DbException {
@@ -155,3 +165,4 @@ public abstract class DbRecord {
 
     public abstract void destroy();
 }
+

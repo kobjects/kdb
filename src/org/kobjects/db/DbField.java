@@ -17,50 +17,51 @@ public class DbField {
     /**
      * Is the type constant for boolean fields.
      */
-    public static final byte BOOLEAN = 1;
+    public static final int BOOLEAN = 16; // java.sql.types.BOOLEAN
 
     /**
      * Is the type constant for integer fields.
      */
-    public static final byte INTEGER = 2;
+    public static final int INTEGER = 4; // java.sql.types.INTEGER
 
     /**
      * Is the type constant for long values.
      */
-    public static final byte LONG = 3;
+    public static final int LONG = -5; // java.sql.types.BIGINT
 
     /**
      * Is the type constant for String values.
      */
-    public static final byte STRING = 4;
+    public static final int STRING = 12; // java.sql.types.VARCHAR
 
     /**
      * Is the type constant for binary values.
      */
-    public static final byte BINARY = 5;
+    public static final int BINARY = -3; // java.sql.types.VARBINARY
 
     /**
      * Is the type constant for sets of up to 32 items. Fields of type BITSET
      * are stored like INTEGER fields, but are handled differently in the user
      * interface.
      */
-    public static final byte BITSET = 6;
+    public static final int BITSET = 3000; // 3xxx not used in java sql
 
     /**
      * Is the type constant used for date/time values. Fields of type DATETIME
      * are stored like LONG fields, but are handled differently in the user
      * interface.
      */
-    public static final byte DATETIME = 7;
+    public static final int DATETIME = 93; // java.sql.types.TIMESTAMP
 
     /**
      * Is the type constant used for graphics values. Fields of type GRAPHICS
      * are stored like BINARY fields, but are handled differently in the user
      * interface.
      */
-    public static final byte GRAPHICS = 8;
+    public static final int GRAPHICS = 3001;
     
-    public static final byte DOUBLE = 9;
+    public static final int DOUBLE = 8; // java.sql.types.DOUBLE
+
 
     /**
      * Holds the table this field belongs to.

@@ -31,8 +31,9 @@ public class ResultSetWrapper
     public ResultSetWrapper(String connector)
         throws SQLException {
         try {
-            resultSet =
-                DbManager.connect(connector).select(false);
+        	DbTable table = DbManager.connect(connector);
+        	table.open();
+            resultSet = table.select(false);
         }
         catch (DbException e) {
             throw new SQLException(e.toString());

@@ -157,6 +157,8 @@ public class HttpRecord implements DbRecord {
                 (HttpURLConnection) new URL(url.toString ())
                     .openConnection();
 
+            connection.setDoOutput(true);
+            connection.setRequestMethod("POST");
             BufferedWriter w = new BufferedWriter (new OutputStreamWriter (connection.getOutputStream()));
             
             for (int i = 0; i < content.length; i++) {
@@ -170,9 +172,13 @@ public class HttpRecord implements DbRecord {
                 }
             }
             w.write ("\r\n");
-            w.close();            
+            w.write ("\r\n");
+            w.flush();   
+            if (connection.getResponseCode() != 200) 
+                throw new IOException ("bad response code: "+connection.getResponseCode());         
         }
         catch (Exception e) {
+            e.printStackTrace();
             throw new DbException(e.toString());
         }
 

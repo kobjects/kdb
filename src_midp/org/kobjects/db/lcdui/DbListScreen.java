@@ -1,4 +1,4 @@
-package de.pleumann.sql4me.lcdui;
+package org.kobjects.db.lcdui;
 
 /**
  * <p>Title: </p>
@@ -12,9 +12,9 @@ package de.pleumann.sql4me.lcdui;
 import java.io.*;
 import javax.microedition.midlet.*;
 import javax.microedition.lcdui.*;
-import de.pleumann.sql4me.core.*;
+import org.kobjects.db.*;
 
-public class DBListScreen extends List implements CommandListener {
+public class DbListScreen extends List implements CommandListener {
 
     public static Command OK = new Command("Ok", Command.OK, 1);
     public static Command EDIT = new Command("Edit", Command.OK, 2);
@@ -26,7 +26,7 @@ public class DBListScreen extends List implements CommandListener {
 
     private String title;
 
-    private DBRecord record;
+    private DbRecord record;
 
     private Image icon;
 
@@ -52,7 +52,7 @@ public class DBListScreen extends List implements CommandListener {
 
     private Displayable next;
 
-    public DBListScreen(String title, DBRecord record, String icon, MIDlet midlet, CommandListener listener) throws DBException {
+    public DbListScreen(String title, DbRecord record, String icon, MIDlet midlet, CommandListener listener) throws DbException {
         super(title, Choice.IMPLICIT);
 
         this.record = record;
@@ -72,12 +72,12 @@ public class DBListScreen extends List implements CommandListener {
         setCommandListener(this);
     }
 
-    public void refresh() throws DBException {
+    public void refresh() throws DbException {
         for (int i = size() - 1; i >= 0; i--) delete(i);
 
         record.reset();
 
-        while (record.hasNextElement()) {
+        while (record.hasNext()) {
             record.next();
             String s = getRecordText();
 
@@ -133,7 +133,7 @@ public class DBListScreen extends List implements CommandListener {
 
             else if (cmd == NEW) {
                 record.insert();
-                new DBEditScreen(editTitle, record, editFields, midlet, this).showScreen(this);
+                new DbEditScreen(editTitle, record, editFields, midlet, this).showScreen(this);
             }
 
             else if (cmd == EDIT) {
@@ -141,7 +141,7 @@ public class DBListScreen extends List implements CommandListener {
 
                 if (i != -1) {
                     record.absolute(i);
-                    new DBEditScreen(editTitle, record, editFields, midlet, this).showScreen(this);
+                    new DbEditScreen(editTitle, record, editFields, midlet, this).showScreen(this);
                 }
             }
 
@@ -155,7 +155,7 @@ public class DBListScreen extends List implements CommandListener {
                 }
             }
 
-            else if (cmd == DBEditScreen.OK) {
+            else if (cmd == DbEditScreen.OK) {
                 if (sorted) {
                     refresh();
                 }
@@ -196,17 +196,17 @@ public class DBListScreen extends List implements CommandListener {
         display.setCurrent(alert, display.getCurrent());
     }
 
-    public void showScreen(Displayable next) throws DBException {
+    public void showScreen(Displayable next) throws DbException {
         this.next = next;
         refresh();
         Display.getDisplay(midlet).setCurrent(this);
     }
 
-    public int getSelectedId() throws DBException {
+    public int getSelectedId() throws DbException {
         int i = getSelectedIndex();
 
         if (i != -1) {
-            return record.getId();
+            return ((Integer) record.getId()).intValue ();
         }
         else {
             return -1;

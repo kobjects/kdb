@@ -1,11 +1,11 @@
-package de.pleumann.sql4me.lcdui;
+package org.kobjects.db.lcdui;
 
 /**
  * <p>Title: </p>
  * <p>Description: </p>
  * <p>Copyright: Copyright (c) 2002</p>
  * <p>Company: </p>
- * @author unascribed
+ * @author Joerg Pleumann
  * @version 1.0
  */
 
@@ -13,17 +13,17 @@ import java.io.*;
 import java.util.*;
 import javax.microedition.midlet.*;
 import javax.microedition.lcdui.*;
-import javax.microedition.rms.*;
-import de.pleumann.sql4me.core.*;
+//import javax.microedition.rms.*;
+import org.kobjects.db.*;
 
-public class DBEditScreen extends Form implements CommandListener {
+public class DbEditScreen extends Form implements CommandListener {
 
     public static Command OK = new Command("Save", Command.OK, 1);
     public static Command CANCEL = new Command("Cancel", Command.CANCEL, 2);
 
     private MIDlet midlet;
 
-    private DBRecord record;
+    private DbRecord record;
 
     private int[] fields;
 
@@ -33,7 +33,7 @@ public class DBEditScreen extends Form implements CommandListener {
 
     private Displayable next;
 
-    public DBEditScreen(String title, DBRecord record, String[] fields, MIDlet midlet, CommandListener listener) {
+    public DbEditScreen(String title, DbRecord record, String[] fields, MIDlet midlet, CommandListener listener) {
         super(title);
 
         this.record = record;
@@ -52,38 +52,38 @@ public class DBEditScreen extends Form implements CommandListener {
     }
 
     private void addWidgets(String[] names) {
-        DBTable table = record.getTable();
+        DbTable table = record.getTable();
 
         for (int i = 0; i < fields.length; i++) {
             fields[i] = table.findField(names[i]);
 
-            String label = table.getField(fields[i]).getUiLabel();
+            String label = table.getField(fields[i]).getLabel();
             if ((label == null) || "".equals(label)) label = table.getField(fields[i]).getName();
             label = label + ":";
 
-            if ((table.getField(fields[i]).getType() == DBField.BOOLEAN) || (table.getField(fields[i]).getUiValues() != null)) {
-                String[] values = table.getField(fields[i]).getUiValues();
+            if ((table.getField(fields[i]).getType() == DbField.BOOLEAN) || (table.getField(fields[i]).getValues() != null)) {
+                String[] values = table.getField(fields[i]).getValues();
                 if (values == null) values = new String[] {"No", "Yes"};
 
-                int mode = table.getField(fields[i]).getType() == DBField.BITSET ? Choice.MULTIPLE : Choice.EXCLUSIVE;
+                int mode = table.getField(fields[i]).getType() == DbField.BITSET ? Choice.MULTIPLE : Choice.EXCLUSIVE;
                 ChoiceGroup group = new ChoiceGroup(label, mode, values, null);
                 append(group);
                 widgets[i] = group;
             }
-            else if (table.getField(fields[i]).getType() == DBField.GRAPHICS) {
+            else if (table.getField(fields[i]).getType() == DbField.GRAPHICS) {
                 Image img = Image.createImage(10, 10);
-                ImageItem image = new ImageItem(label, img, table.getField(fields[i]).getUiConstraints(), "Image");
+                ImageItem image = new ImageItem(label, img, table.getField(fields[i]).getConstraints(), "Image");
                 append(image);
                 widgets[i] = image;
             }
-            else if (table.getField(fields[i]).getType() == DBField.DATETIME) {
-                DateField daf = new DateField(label, table.getField(fields[i]).getUiConstraints(), null);
+            else if (table.getField(fields[i]).getType() == DbField.DATETIME) {
+                DateField daf = new DateField(label, table.getField(fields[i]).getConstraints(), null);
                 append(daf);
                 widgets[i] = daf;
             }
             else {
-                TextField entry = new TextField(label, "", 64, table.getField(fields[i]).getUiConstraints());
-                if (table.getField(fields[i]).getUiMaxSize() != 0) entry.setMaxSize(table.getField(fields[i]).getUiMaxSize());
+                TextField entry = new TextField(label, "", 64, table.getField(fields[i]).getConstraints());
+                if (table.getField(fields[i]).getMaxSize() != 0) entry.setMaxSize(table.getField(fields[i]).getMaxSize());
                 append(entry);
                 widgets[i] = entry;
             }
@@ -96,21 +96,21 @@ public class DBEditScreen extends Form implements CommandListener {
         }
     }
 
-    private void refresh() throws IOException, RecordStoreException {
-        DBTable table = record.getTable();
+    private void refresh() { //throws IOException, RecordStoreException {
+        DbTable table = record.getTable();
 
         for (int i = 0; i < fields.length; i++) {
             if (widgets[i] instanceof ChoiceGroup) {
                 ChoiceGroup group = (ChoiceGroup)widgets[i];
                 int type = table.getField(fields[i]).getType();
 
-                if (type == DBField.BOOLEAN) {
+                if (type == DbField.BOOLEAN) {
                     group.setSelectedIndex(record.getBoolean(fields[i]) ? 1 : 0, true);
                 }
-                else if (type == DBField.INTEGER) {
+                else if (type == DbField.INTEGER) {
                     group.setSelectedIndex(record.getInteger(fields[i]), true);
                 }
-                else if (type == DBField.BITSET) {
+                else if (type == DbField.BITSET) {
                     boolean[] selects = new boolean[group.size()];
                     int value = record.getInteger(fields[i]);
                     for (int j = 0; j < selects.length; j++) {
@@ -133,8 +133,8 @@ public class DBEditScreen extends Form implements CommandListener {
         }
     }
 
-    private void update() throws DBException {
-        DBTable table = record.getTable();
+    private void update() throws DbException {
+        DbTable table = record.getTable();
 
         for (int i = 0; i < fields.length; i++) {
             int type = table.getField(fields[i]).getType();
@@ -142,13 +142,13 @@ public class DBEditScreen extends Form implements CommandListener {
             if (widgets[i] instanceof ChoiceGroup) {
                 ChoiceGroup group = (ChoiceGroup)widgets[i];
 
-                if (type == DBField.BOOLEAN) {
-                    record.updateBoolean(fields[i], group.isSelected(1));
+                if (type == DbField.BOOLEAN) {
+                    record.setBoolean(fields[i], group.isSelected(1));
                 }
-                else if (type == DBField.INTEGER) {
-                    record.updateInteger(fields[i], group.getSelectedIndex());
+                else if (type == DbField.INTEGER) {
+                    record.setInteger(fields[i], group.getSelectedIndex());
                 }
-                else if (type == DBField.BITSET) {
+                else if (type == DbField.BITSET) {
                     boolean[] selects = new boolean[group.size()];
                     group.getSelectedFlags(selects);
                     int value = 0;
@@ -158,18 +158,18 @@ public class DBEditScreen extends Form implements CommandListener {
                         System.out.println(value);
 
                     }
-                    record.updateInteger(fields[i], value);
+                    record.setInteger(fields[i], value);
                 }
             }
             else {
-                if (type == DBField.INTEGER) {
-                    record.updateInteger(fields[i], Integer.parseInt(((TextField)widgets[i]).getString()));
+                if (type == DbField.INTEGER) {
+                    record.setInteger(fields[i], Integer.parseInt(((TextField)widgets[i]).getString()));
                 }
-                else if (type == DBField.DATETIME) {
-                    record.updateLong(fields[i], ((DateField)widgets[i]).getDate().getTime());
+                else if (type == DbField.DATETIME) {
+                    record.setLong(fields[i], ((DateField)widgets[i]).getDate().getTime());
                 }
-                else if (type == DBField.STRING) {
-                    record.updateString(fields[i], ((TextField)widgets[i]).getString());
+                else if (type == DbField.STRING) {
+                    record.setString(fields[i], ((TextField)widgets[i]).getString());
                 }
             }
         }
@@ -204,7 +204,7 @@ public class DBEditScreen extends Form implements CommandListener {
         display.setCurrent(alert, display.getCurrent());
     }
 
-    public void showScreen(Displayable next) throws RecordStoreException, IOException {
+    public void showScreen(Displayable next) { //throws RecordStoreException, IOException {
         this.next = next;
         refresh();
         Display.getDisplay(midlet).setCurrent(this);

@@ -127,13 +127,13 @@ public class DbSqlParser {
 
         else if (c == '~') {
             bufferPos++;
-            tokenType = DbCondition.EQIC;
+            tokenType = DbCondition.EQ_TEXT;
         }
 
         else if (c == '<') {
             if (buffer[++bufferPos] == '=') {
                 bufferPos++;
-                tokenType = DbCondition.LEQ;
+                tokenType = DbCondition.LE;
             }
             tokenType = DbCondition.LT;
         }
@@ -141,7 +141,7 @@ public class DbSqlParser {
         else if (c == '>') {
             if (buffer[++bufferPos] == '=') {
                 bufferPos++;
-                tokenType = DbCondition.GEQ;
+                tokenType = DbCondition.GE;
             }
             tokenType = DbCondition.GT;
         }
@@ -208,7 +208,7 @@ public class DbSqlParser {
 
             nextToken();
 
-            if ((tokenType < DbCondition.LT) || (tokenType > DbCondition.EQIC)) {
+            if ((tokenType < DbCondition.LT) || (tokenType > DbCondition.EQ_TEXT)) {
                 throw new DbException("Relational operator expected (" + tokenPos + ")");
             }
             int relop = tokenType;

@@ -1,6 +1,5 @@
 package org.kobjects.db;
 
-
 /**
  * <p>Title: </p>
  * <p>Description: </p>
@@ -12,7 +11,20 @@ package org.kobjects.db;
 
 public class DbException extends Exception {
 
+    private Exception chained;
+
     public DbException(String message) {
         super(message);
+    }
+
+    public DbException(String message, Exception chained) {
+        super(message);
+        this.chained = chained;
+    }
+
+    public String toString() {
+        String msg = super.toString();
+        if (chained != null) msg = msg + " (" + chained.toString() + ")";
+        return msg;
     }
 }

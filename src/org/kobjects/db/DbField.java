@@ -61,6 +61,11 @@ public class DbField {
     public static final byte GRAPHICS = 8;
 
     /**
+     * Holds the table this field belongs to.
+     */
+    private DbTable table;
+
+    /**
      * Holds the field's number.
      */
     private int number;
@@ -102,7 +107,7 @@ public class DbField {
     private String[] values;
 
     /**
-     * Holds the field's default value. This values is assigned to the
+     * Holds the field's default value. This value is assigned to the
      * corresponding column of a newly inserted record.
      */
     private Object defValue;
@@ -113,14 +118,15 @@ public class DbField {
      * factory method.
      */
 
-    public DbField(int number, String name, int type) {
+    DbField(DbTable table, int number, String name, int type) {
+        this.table = table;
         this.number = number;
         this.name = name;
         this.type = type;
     }
 
     /**
-     * Returns the field's number.
+     * Returns the field's number. Field numbering starts from zero.
      */
     public int getNumber() {
         return number;
@@ -143,9 +149,9 @@ public class DbField {
     /**
      * Changes the field's default value. Note that:
      * <ul>
-     *   <li> Wrapper classes have to be used for primitive types.</li>
-     *   <li> The actual class has to match the field type. Otherwise a
-     *        <code>ClassCastException</code> will occur later.</li>
+     *   <li>Wrapper classes have to be used for primitive types.</li>
+     *   <li>The actual class has to match the field type. Otherwise a
+     *       <code>ClassCastException</code> will occur later.</li>
      * </li>
      */
     public void setDefault(Object value) {
@@ -200,5 +206,41 @@ public class DbField {
         this.maxSize = maxSize;
         this.constraints = constraints;
         this.values = values;
+    }
+
+    /**
+     * Utility method to compare two field values. The type of the values must
+     * be specified. The method returns a value smaller than zero if value1 < value2,
+     * a value greater than zero if if value1 > value2, and zero otherwiese.
+     * Binary values are compared according to their length, just to have a
+     * defined behaviour for all types.
+     */
+    public static int compare(int type, Object value1, Object value2) {
+        switch (type) {
+            case DbField.INTEGER:
+            case DbField.BITSET: {
+                return ((Integer)value1).intValue() - ((Integer)value2).intValue();
+            }
+
+            case DbField.LONG:
+            case DbField.DATETIME: {
+                long l = ((Long)value1).longValue() - ((Long)value2).longValue();
+
+                if (l < 0) return -1; else if (l > 0) return 1; else return 0;
+            }
+
+            case DbField.STRING:
+            case DbField.BOOLEAN: {
+                return value1.toString().compareTo(value2.toString());
+            }
+
+            case DbField.BINARY:
+            case DbField.GRAPHICS:
+                return ((byte[])value1).length - ((byte[])value2).length;
+
+            default: {
+                throw new IllegalArgumentException("Illegal type \"" + type + "\"");
+            }
+        }
     }
 }

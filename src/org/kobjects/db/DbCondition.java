@@ -10,22 +10,70 @@ package org.kobjects.db;
  */
 
 /**
- * In DbCondition umbenennen.
+ * Represents a compound condition for filtering a table. Basically the
+ * WHERE [...] part in an SQL SELECT statment.
  */
-
 public class DbCondition {
 
+    /**
+     * Type constant for "less than".
+     */
     public static final int LT   = 1;
-    public static final int GT   = 2;
-    public static final int LEQ  = 3;
-    public static final int GEQ  = 4;
-    public static final int EQ   = 5;
-    public static final int NEQ  = 6;
-    public static final int EQIC = 7;
 
+    /**
+     * Type constant for "greater than".
+     */
+    public static final int GT   = 2;
+
+    /**
+     * Type constant for "less or equal".
+     */
+    public static final int LE  = 3;
+
+    /**
+     * Type constant for "greater or equal".
+     */
+    public static final int GE   = 4;
+
+    /**
+     * Type constant for "equal".
+     */
+    public static final int EQ   = 5;
+
+    /**
+     * Type constant for "not equal".
+     */
+    public static final int NE   = 6;
+
+    /**
+     * Type constant for "textually equal". Results in a case-insensitive String
+     * comparison.
+     */
+    public static final int EQ_TEXT = 7;
+
+    /**
+     * Type constant for AND operator. The value of a node of type AND is
+     * true if and only if all its children evaluate to true.
+     */
     public static final int AND  = 16;
+
+    /**
+     * Type constant for OR operator. The value of a node of type OR is
+     * true if at least one its children evaluates to true, and false otherwise.
+     */
     public static final int OR   = 17;
+
+    /**
+     * Type constant for XOR operator. A node of type XOR must have exactly two
+     * children. It evaluates to true if and only if its children evaluate
+     * to different truth values.
+     */
     public static final int XOR  = 18;
+
+    /**
+     * Type constant for NOT operator. A node of type NOT must have exactly one
+     * child. It evaluates to true if and only if this child evaluates to false.
+     */
     public static final int NOT  = 19;
 
     /**
@@ -39,7 +87,8 @@ public class DbCondition {
     private int field;
 
     /**
-     * Holds the node's field number, in case this is a leaf node.
+     * Holds the node's field type, in case this is a leaf node. This value
+     * is set when the Condition is assigned a table.
      */
     private int type;
 
@@ -54,9 +103,19 @@ public class DbCondition {
      */
     private DbCondition[] children;
 
+    /**
+     * Creates a new Condition node for a relation between a field (given by its
+     * number) and a value. The operator must be one of LT, GT, LE, GE, EQ, NE,
+     * or EQIC. The field number may be -1, which means that the record ID is
+     * compared to the given values.
+     */
     public DbCondition(int operator, int field, Object value) throws DbException {
-        if ((operator < LT) || (operator > EQIC)) {
+        if ((operator < LT) || (operator > EQ_TEXT)) {
             throw new DbException("Illegal type code \"" + type + "\" for leaf node.");
+        }
+
+        if (operator == EQ_TEXT) {
+            value = value.toString().toUpperCase();
         }
 
         this.operator = operator;
@@ -64,6 +123,9 @@ public class DbCondition {
         this.value = value;
     }
 
+    /**
+     * Creates a new Condition node for an AND, OR, XOR or NOT operator.
+     */
     public DbCondition(int operator, DbCondition[] children) throws DbException {
         if ((operator < AND) || (operator > NOT)) {
             throw new DbException("Illegal type code \"" + type + "\" for inner node.");
@@ -73,9 +135,10 @@ public class DbCondition {
         this.children = children;
     }
 
+    /**
+     * Assigns this condition a table.
+     */
     public void setTable(DbTable table) {
-        System.out.println("setTable(): " + this.toString());
-
         if (operator >= AND) {
             for (int i = 0; i < children.length; i++) {
                 children[i].setTable(table);
@@ -86,37 +149,42 @@ public class DbCondition {
         }
     }
 
-    public boolean evaluate(Object[] record) {
+    /**
+     * Evaluates this Condition for the given record.
+     */
+    public boolean evaluate(Object id, Object[] values) {
         System.out.println("evaluate(): " + this.toString() + " of type " + operator);
 
         if (operator < AND) {
+            Object obj = (field == -1) ? id : values[field];
+
             switch (operator) {
                 case LT: {
-                    return compare(type, record[field], value) < 0;
+                    return DbField.compare(type, obj, value) < 0;
                 }
 
                 case GT: {
-                    return compare(type, record[field], value) > 0;
+                    return DbField.compare(type, obj, value) > 0;
                 }
 
-                case LEQ: {
-                    return compare(type, record[field], value) <= 0;
+                case LE: {
+                    return DbField.compare(type, obj, value) <= 0;
                 }
 
-                case GEQ: {
-                    return compare(type, record[field], value) >= 0;
+                case GE: {
+                    return DbField.compare(type, obj, value) >= 0;
                 }
 
                 case EQ: {
-                    return compare(type, record[field], value) == 0;
+                    return DbField.compare(type, obj, value) == 0;
                 }
 
-                case NEQ: {
-                    return compare(type, record[field], value) != 0;
+                case NE: {
+                    return DbField.compare(type, obj, value) != 0;
                 }
 
-                case EQIC: {
-                    return compare(type, record[field].toString().toUpperCase(), value) == 0;
+                case EQ_TEXT: {
+                    return obj.toString().toUpperCase().equals(value.toString());
                 }
             }
         }
@@ -124,7 +192,7 @@ public class DbCondition {
             switch (operator) {
                 case AND: {
                     for (int i = 0; i < children.length; i++) {
-                        if (!children[i].evaluate(record)) return false;
+                        if (!children[i].evaluate(id, values)) return false;
                     }
 
                     return true;
@@ -132,47 +200,22 @@ public class DbCondition {
 
                 case OR: {
                     for (int i = 0; i < children.length; i++) {
-                        if (children[i].evaluate(record)) return true;
+                        if (children[i].evaluate(id, values)) return true;
                     }
 
                     return false;
                 }
 
                 case XOR: {
-                    return children[0].evaluate(record) ^ children[1].evaluate(record);
+                    return children[0].evaluate(id, values) ^ children[1].evaluate(id, values);
                 }
 
                 case NOT: {
-                    return !children[0].evaluate(record);
+                    return !children[0].evaluate(id, values);
                 }
             }
         }
 
-        return false; // Dummy
-    }
-
-    public static int compare(int type, Object actual, Object formal) {
-        System.out.println("compare(): " + actual + " / " + formal);
-
-        switch (type) {
-            case DbField.INTEGER:
-            case DbField.BITSET: {
-                return ((Integer)actual).intValue() - ((Integer)formal).intValue();
-            }
-
-            case DbField.LONG:
-            case DbField.DATETIME: {
-                long l = ((Long)actual).longValue() - ((Long)formal).longValue();
-
-                if (l < 0) return -1; else if (l > 0) return 1; else return 0;
-            }
-
-            case DbField.STRING:
-            case DbField.BOOLEAN: {
-                return actual.toString().compareTo(formal.toString());
-            }
-        }
-
-        return 0; // Default
+        return false; // To make compiler happy
     }
 }

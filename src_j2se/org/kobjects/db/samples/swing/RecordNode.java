@@ -25,6 +25,7 @@ class RecordNode extends AbstractRecordNode {
 	super (parent, dbTable, query);
 
 	JTable table = new JTable (new DbTableModel (record));
+	table.setAutoResizeMode (JTable.AUTO_RESIZE_OFF);
 	
 	panel.add (new JScrollPane (table), BorderLayout.CENTER);
 

@@ -108,3 +108,5 @@ public interface DbTable {
      */
     public DbRecord select(DbCondition filter, int oderBy, boolean reverse, boolean updated) throws DbException;
 }
+
+

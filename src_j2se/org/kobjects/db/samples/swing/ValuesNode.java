@@ -8,10 +8,12 @@ import javax.swing.table.*;
 class ValuesNode extends AbstractNode {
 
     JPanel panel = new JPanel (new BorderLayout ());
+    String name;
 
-    ValuesNode (AbstractNode parent, Hashtable occurances) {
+    ValuesNode (AbstractNode parent, String name, Hashtable occurances) {
 	super (parent, false);
-	
+	this.name = name;
+
 	DefaultTableModel dtm = new DefaultTableModel 
 	    (new String [] {"Value", "Occurances"}, 0);
 
@@ -32,8 +34,15 @@ class ValuesNode extends AbstractNode {
 	
     }
 
+    public String toString () {
+	return name;
+    }
 
     public Component getComponent () {
 	return panel;
     }
 }
+
+
+
+

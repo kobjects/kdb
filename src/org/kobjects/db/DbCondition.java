@@ -156,7 +156,7 @@ public class DbCondition {
      * Evaluates this Condition for the given record.
      */
     public boolean evaluate(Object[] values) {
-        System.out.println("evaluate(): " + this.toString() + " of type " + operator);
+        //System.out.println("evaluate(): " + this.toString() + " of type " + operator);
 
         if (operator < AND) {
             Object obj =  values[field];

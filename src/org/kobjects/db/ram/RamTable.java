@@ -90,6 +90,12 @@ public class RamTable implements DbTable {
     public int getFieldCount() {
         return fields.size();
     }
+    
+    protected void update(int index, Object[] entry) throws DbException {		
+        records.setElementAt(entry, index);
+        modified = true;
+    		
+    }
 
     public DbRecord select(boolean updated) throws DbException {
         return select(null, null, -1, false, updated);

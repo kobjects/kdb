@@ -149,13 +149,12 @@ class RamRecord implements DbRecord {
         modified = false;
     }
 
-    public void update() {
+    public void update() throws DbException {
         Object[] content = new Object[values.length];
         for (int i = 0; i < values.length; i++)
             content[i] = values[i];
 
-        table.records.setElementAt(content, index);
-        table.modified = true;
+		table.update(index, content);  
     }
 
     public void delete() {

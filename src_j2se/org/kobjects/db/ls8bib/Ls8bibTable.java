@@ -2,6 +2,7 @@ package org.kobjects.db.ls8bib;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 import org.kobjects.db.bibtex.BibtexTable;
 import org.kobjects.db.*;
 
@@ -13,90 +14,116 @@ import org.kobjects.db.*;
  */
 public class Ls8bibTable extends BibtexTable {
 
-    // let run do nothing
+	// let run do nothing
 
-    public void run() {
-    }
+	Vector update = new Vector();
 
-    // let rewrite do nothing
+	// let rewrite do nothing
 
-    public void rewrite() {
-    }
+	public void rewrite() {
+	}
 
-    protected void update(int index, Object[] entry)
-        throws DbException {
+	protected void update(int index, Object[] entry) throws DbException {
 
-        Object[] old = null;
+		int keyField = findField("key");
 
-        if (index > 0)
-            old = (Object[]) records.elementAt(index);
+		if (entry == null) {
+			Object[] old = (Object[]) records.elementAt(index);
+			update.addElement(old[keyField]);
+		} else {
 
+			String key = (String) entry [keyField];
 
-        if (old != null || entry != null) {
+			if (key != null && key.length() > 0) {
+				char c = key.charAt (key.length()-1);
 
-            try {
+				if (c >= '0' && c <= '9') {
+					c = 'a';
+					for (int i = 0; i < records.size(); i++) {
+						Object [] r = (Object[]) records.elementAt(i);
+						if (r == null) continue;
+						
+						String k2 = (String) r[keyField];
+						
+						if (k2 == null) continue;
+						
+						if (k2.startsWith (key) && k2.length() == key.length()+1) {
+							char c2 = k2.charAt (k2.length()-1);
+							// make sure key is not incremented if already assigned
+							if (index == i) {
+								c = c2;
+								break;
+							} 
+							if (c2 >= c) c = (char) (((int) c2) + 1);	
+						}
+					}	
+					entry[keyField] = key + c;
+				}
 
-				int keyField = findField("key");
+				update.addElement(entry);
+			}
+		}
 
-                Socket socket =
-                    new Socket("kiew.cs.uni-dortmund.de", 8410);
+		super.update(index, entry);
+	}
 
-                BufferedReader reader =
-                    new BufferedReader(
-                        new InputStreamReader(
-                            socket.getInputStream()));
+	public void run() {
+		while (true) {
 
-            /*    while (true) {
-                    String line = reader.readLine();
-                    System.out.println ("waiting for start: "+line);
-					if(line.trim().equals("Start!")) break;
-                } */
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+			};
 
-                BufferedWriter bw =
-                    new BufferedWriter(
-                        new OutputStreamWriter(
-                            socket.getOutputStream()));
+			if (update.size() == 0)
+				continue;
 
+			Vector v = update;
+			update = new Vector();
 
-                if (entry != null)
-                    writeEntry(bw, entry);
-                else
-                    bw.write("*" + old[keyField]);
+			try {
 
-                bw.write("\n\n<ende>\n");
-                bw.flush();
+				Socket socket = new Socket("kiew.cs.uni-dortmund.de", 8410);
 
-                while (true) {
-                    String line = reader.readLine();
-                    System.out.println("ls8bibline:" + line);
-                    if (line == null)
-                        break;
+				BufferedReader reader =
+					new BufferedReader(
+						new InputStreamReader(socket.getInputStream()));
 
-                    line = line.trim();
-					if (line.endsWith ("wurde geloescht!")
-					|| line.equals ("*****************************************")) break;
-					
+				/*    while (true) {
+				        String line = reader.readLine();
+				        System.out.println ("waiting for start: "+line);
+						if(line.trim().equals("Start!")) break;
+				    } */
 
-					if (line.trim().startsWith ("@")) {
-						int cut0 = line.indexOf ('{');
-						if (cut0 != -1) 
-							entry [keyField] = line.substring (cut0+1);
+				BufferedWriter bw =
+					new BufferedWriter(
+						new OutputStreamWriter(socket.getOutputStream()));
 
-						System.out.println ("newkey: "+entry[keyField]);
-													
-					}                    
-                }
-                System.out.println ("closing connection");
-                bw.close();
-                reader.close();
-                socket.close();
+				for (int i = 0; i < v.size(); i++) {
+					Object o = v.elementAt(i);
+					bw.write("\n\n");
 
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-                throw new DbException(e.toString());
-            }
-        }
-        super.update(index, entry);
-    }
+					if (o instanceof String)
+						bw.write("\n\n*" + o + "\n\n");
+					else {
+						writeEntry(bw, (Object[]) o);
+					}
+				}
+
+				bw.write("\n\n<ende>\n");
+				bw.flush();
+
+				while (true) {
+					String line = reader.readLine();
+					System.out.println("ls8bibline:" + line);
+
+					if (line == null)
+						break;
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+				//			throw new DbException(e.toString());
+			}
+		}
+	}
 }

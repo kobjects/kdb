@@ -95,28 +95,25 @@ public class RamTable implements DbTable {
     
     
     /** 
-     * Stores a *copy* of the given record in the records vector 
-     * a copy is generated because the record hands over
-     * its internal buffer in order to allow id genertation etc. */
+     * Overwrites the fields of the existing object with contents of the given entry */
     
     protected void update(int i, Object[] entry) throws DbException {
     	
-    	Object[] cpy = null;
-    	
-    	if (entry != null) {
-    		cpy = new Object[entry.length];
-    		System.arraycopy (entry, 0, cpy, 0, entry.length);	
+    	if (entry == null) {
+    		records.setElementAt (null, i);
+    		return;
     	}
     	
+    	Object[] rec = i == INSERT_ROW ? new Object[entry.length] : ((Object []) records.elementAt(i));
+
+		System.arraycopy (entry, 0, rec, 0, entry.length);
+    	
     	if (i == INSERT_ROW) {
-    		
     		if (idField != -1) 
 	    		index.put (entry[idField], new Integer(records.size()));
 	    		
-    		records.addElement(cpy);
+    		records.addElement(rec);
     	}
-    	else		
-	        records.setElementAt(cpy, i);
 
         modified = true;    		
     }

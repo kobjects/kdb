@@ -46,11 +46,11 @@ public class Ls8bibTable extends BibtexTable {
                         new InputStreamReader(
                             socket.getInputStream()));
 
-                while (true) {
+            /*    while (true) {
                     String line = reader.readLine();
                     System.out.println ("waiting for start: "+line);
 					if(line.trim().equals("Start!")) break;
-                }
+                } */
 
                 BufferedWriter bw =
                     new BufferedWriter(

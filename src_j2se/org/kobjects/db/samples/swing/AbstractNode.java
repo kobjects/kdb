@@ -77,6 +77,22 @@ abstract class AbstractNode implements TreeNode {
     public boolean isLeaf () {
 	return children == null || children.size () == 0;
     }
-}
 
+    public void close () {
+	if (parent != null) {
+	    int i = parent.children.indexOf (this);
+	    RootNode rn = getRoot ();
+	    JTree tree = rn.browser.tree;
+	    DefaultTreeModel dtm = (DefaultTreeModel) tree.getModel ();
+	    parent.children.removeElementAt (i);
+	    dtm.nodesWereRemoved (parent, new int[] {i}, new Object[]{this});
+
+	    tree.setSelectionPath (parent.getPath ());
+	}
+
+	if (children != null) 
+	    for (int i = 0; i < children.size (); i++) 
+		((AbstractNode) children.elementAt (i)).close ();
+    }
+}
 

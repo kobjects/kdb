@@ -84,9 +84,6 @@ class RecordNode extends AbstractRecordNode {
 	    TableBrowser.error (e, null);
 	}
     }
-
-    public void close () {
-    }
 }
 
 

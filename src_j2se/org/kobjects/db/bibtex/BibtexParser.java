@@ -98,7 +98,6 @@ class BibtexParser {
 
 
     void recurse (StringBuffer buf) throws IOException {
-	buf.append ('{');
 
 	while (true) {
 	    buf.append (readTo ("{}"));
@@ -107,10 +106,10 @@ class BibtexParser {
 		break;
 	    }
 	    
+	    buf.append ('{');
 	    recurse (buf);
+	    buf.append ('}');
 	}
-	
-	buf.append ('}');
     }
 
 
@@ -163,9 +162,8 @@ class BibtexParser {
 	while (true) {
             readTo ("@<");
             int i = read ();
-	    if (i != '@') break;     // mit '<' wird <ende> vom emacs erkannt...
-	    
-	    if (peek == -1) break;
+	    if (i != '@') break;     // mit '<' wird <ende> vom emacs erkannt...   
+	    //if (peek == -1) break; redundant with i != '@'
 	    
 	    StringBuffer type = new StringBuffer ();
 	    StringBuffer id = new StringBuffer ();
@@ -180,7 +178,7 @@ class BibtexParser {
 	    
 	    // "eintrag"
 	    
-	    addEntry (type.toString ().trim().toLowerCase ().substring(1), 
+	    addEntry (type.toString ().trim().toLowerCase (), 
 		      id.toString ().trim ());
 	    
 	    if (c == ',') {

@@ -12,12 +12,10 @@ public class RamTable implements DbTable {
 	protected Hashtable index;
 	protected boolean open;
 	protected boolean exists;
-
+    protected boolean modified;
 	protected int[] idFields;
 
 	public void connect(String connector) throws DbException {
-		//if (name != null) 
-		//   throw new DbException ("connector must be null!");
 	}
 
 	public int findField(String name) {
@@ -75,12 +73,12 @@ public class RamTable implements DbTable {
 		exists = true;
 	}
 
-	public void close() {
+	public void close() throws DbException {
 		open = false;
 		records = null;
 	}
 
-	public void delete() {
+	public void delete() throws DbException {
 		close();
 	}
 

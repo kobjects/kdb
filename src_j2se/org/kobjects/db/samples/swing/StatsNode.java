@@ -39,9 +39,6 @@ class StatsNode extends AbstractRecordNode {
 	}
     }
 
-    public void close () {
-
-    }
 
     public Component getComponent () {
 	return panel;

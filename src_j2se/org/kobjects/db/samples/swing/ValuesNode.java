@@ -30,10 +30,6 @@ class ValuesNode extends AbstractNode {
     }
 
 
-    public void close () {
-	
-    }
-
     public String toString () {
 	return name;
     }

@@ -62,7 +62,7 @@ public interface DbTable {
     /**
      * Closes the table. Always succeeds.
      */
-    public void close();
+    public void close() throws DbException;
 
     /**
      * Adds a field to the table. The table must be closed for this method

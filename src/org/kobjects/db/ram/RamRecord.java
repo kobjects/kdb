@@ -166,6 +166,7 @@ class RamRecord implements DbRecord {
 	    content [i] = values [i];
 
 	table.records.setElementAt (content, index);
+	table.modified = true;
     }
 
 
@@ -206,6 +207,8 @@ class RamRecord implements DbRecord {
         current = -1;
     }
 
+    /** Dispose does not need to do much in the case of 
+	ramtable */
 
     public void dispose () {
         //throw new RuntimeException ("NYI");

@@ -23,6 +23,7 @@ public class TableBrowser extends JFrame implements TreeSelectionListener {
 
 	addWindowListener (new WindowAdapter () {
 		public void windowClosing (WindowEvent e) {
+		    rootNode.close ();
 		    System.exit (0);
 		}
 	    });

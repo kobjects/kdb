@@ -57,6 +57,53 @@ public class BibtexTable extends RamTable {
 	}
 
 
+    public void close () throws DbException {
+	if (modified) {
+	    try {
+		File nf = new File (filename + ".new");
+		BufferedWriter w = new BufferedWriter (new FileWriter (nf));
+		for (int i = 0; i < records.size (); i ++) {
+		    Object [] entry = (Object []) records.elementAt (i);
+		    w.write ("@" + entry [0] + "{" + entry [1]);
+		    for (int j = 2; j < entry.length; j++) {
+			if (entry [j] == null 
+			    || "".equals (entry[j])) continue;
+			w.write (',');
+			w.newLine ();
+			w.write ("  "+getField (j).getName () + " = ");
+			String e = entry[j].toString ();
+			for (int k = 0; k < e.length (); k++) {
+			    char c = e.charAt (k);
+			    if ((c < '0' || c > '9') 
+				&& (c < 'a' || c > 'z') 
+				&& (c < 'A' || c > 'Z')) {
+				e = "{"+e+"}";
+				break;
+			    }
+			}
+			w.write (e);
+		    }
+		    w.newLine ();
+		    w.write ('}');
+		    w.newLine ();
+		    w.newLine ();
+		    w.newLine ();
+		}
+		w.close ();
+		
+		new File (filename + ".bak").delete ();
+		new File (filename).renameTo (new File (filename + ".bak"));
+		nf.renameTo (new File (filename));
+		
+		modified = false;
+	    }
+	    catch (IOException e) {
+		throw new DbException (""+e);
+	    }
+	}
+	super.close ();
+    }
+
 
 	public static void main(String argv[]) throws DbException {
 
@@ -74,3 +121,7 @@ public class BibtexTable extends RamTable {
 	}
 
 }
+
+
+
+

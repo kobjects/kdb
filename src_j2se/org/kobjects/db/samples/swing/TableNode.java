@@ -84,13 +84,19 @@ class TableNode extends AbstractNode {
     }
 
     public void close () {
+	super.close ();
+	try {
+	    dbTable.close ();
+	}
+	catch (Exception e) {
+	    TableBrowser.error (e, null);
+	}
     }
 
 
     public Component getComponent () {
 	return panel;
     }
-
 
     public String toString () {
 	return dbTable.getName () + " ("+connector+")";

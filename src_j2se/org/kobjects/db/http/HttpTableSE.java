@@ -232,15 +232,15 @@ public class HttpTableSE implements DbTable {
                 if (line == null)
                     break;
                 Object[] src = Csv.decode(line);
-                if (fields == null)
+            //    if (fields == null)
                     selected.addElement(src);
-                else {
-                    Object[] dst = new Object[getFieldCount()];
-                    for (int i = 0; i < fields.length; i++)
-                        dst[fields[i]] = src[i];
+           //     else {
+           //         Object[] dst = new Object[getFieldCount()];
+            //        for (int i = 0; i < fields.length; i++)
+           //             dst[fields[i]] = src[i];
 
-                    selected.addElement(dst);
-                }
+           //         selected.addElement(dst);
+            //    }
             }
 
             is.close();

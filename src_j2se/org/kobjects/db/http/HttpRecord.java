@@ -19,31 +19,53 @@ public class HttpRecord implements DbResultSet {
 
     HttpRecord(HttpTableSE table, int[] fields, Vector selection) {
         this.table = table;
+        
+        if (fields == null) {
+            fields = new int[table.getFieldCount()];
+            for (int i = 0; i < fields.length; i++) {
+                fields[i] = i+1;
+            }
+        }
+        
         this.fields = fields;
         this.selection = selection;
-        values = new Object[table.getFieldCount()];
+        values = new Object[fields.length];
     }
 
     public void clear() {
-        values = new Object[getTable().getFieldCount()];
+        values = new Object[fields.length];
         modified = true;
     }
 
     public void deleteAll() throws DbException {
         beforeFirst();
-        while (hasNext()) {
-            next();
+        while (next()) {
             deleteRow();
         }
     }
 
+    
+    public int findField(String name) {
+        for (int i = 1; i <= getColumnCount(); i++)
+            if (getField(i).getName().equals (name))
+                return i;
+                
+        return -1;
+    }
+
+
     public Object getObject(int column) {
-        return values[column];
+        return values[column-1];
     }
 
     public boolean getBoolean(int column) {
         Boolean b = (Boolean) getObject(column);
         return (b == null) ? false : b.booleanValue();
+    }
+    
+    
+    public DbField getField(int column) {
+        return table.getField (fields[column-1]);
     }
 
     public int getInt(int column) {
@@ -68,20 +90,30 @@ public class HttpRecord implements DbResultSet {
 	
 
     public InputStream getBinaryStream(int column) {
-        return (InputStream) getBinaryStream (column);
+        throw new RuntimeException ("NI");
+//        return (InputStream) getBinaryStream (column);
     }
 
 	public long getSize(int column) {
 		return -1;
 	}
-
-    public int[] getSelectedFields() {
-        return fields;
+    
+    public int getColumnCount() {
+        return fields.length;
     }
+    
+    
+ 
+
+/*    public int[] getSelectedFields() {
+        return fields;
+    }*/
+
 
     public boolean isDeleted() {
         return deleted;
     }
+
 
     public void updateBoolean(int column, boolean value) {
         updateObject(column, new Boolean(value));
@@ -96,7 +128,7 @@ public class HttpRecord implements DbResultSet {
     }
 
     public void updateObject(int column, Object value) {
-        values[column] = value;
+        values[column-1] = value;
         modified = true;
     }
 
@@ -110,6 +142,10 @@ public class HttpRecord implements DbResultSet {
         updateObject(column, value); // was: bytes
     }
 
+    public void insertRow() {
+        throw new RuntimeException("NYI");
+    }
+
     public void moveToInsertRow() throws DbException {
         throw new RuntimeException("NYI");
         /*
@@ -121,17 +157,11 @@ public class HttpRecord implements DbResultSet {
         		}*/
     }
 
-    public void insert(Object[] values) throws DbException {
-        moveToInsertRow();
-
-        for (int i = 0; i < values.length; i++) {
-            updateObject(i, values[i]);
-        }
-    }
 
     public boolean isModified() {
         return modified;
     }
+
 
     public void absolute(int position) throws DbException {
         beforeFirst();
@@ -206,15 +236,21 @@ public class HttpRecord implements DbResultSet {
         return table;
     }
 
-    public boolean hasNext() {
-        return current < selection.size() - 1;
+    public boolean isAfterLast() {
+        return current >= selection.size();
     }
-
-    public void next() throws DbException {
-        if (!hasNext())
-            throw new DbException("no next available!");
+    
+    public boolean isLast() {
+        return current == selection.size() -1;
+    }
+    
+    public boolean next() throws DbException {
+        if (isAfterLast()) return false;
         current++;
+        if (isAfterLast()) return false;
+        
         refreshRow();
+        return true;
     }
 
     /** Places the cursor before the first record */

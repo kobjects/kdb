@@ -58,8 +58,7 @@ public class ArffTable extends RamTable {
 
 		DbResultSet record = table.select(false);
 	
-		while (record.hasNext ()) {
-			record.next ();
+		while (record.next ()) {
 			System.out.println ("record: "+record);
 		}	
 	}

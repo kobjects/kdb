@@ -59,7 +59,14 @@ public abstract class DbTable {
 
     public abstract DbField getField(int i);
 
-    public abstract int findField(String name);
+    public int findField(String name) {
+        int cnt = getFieldCount ();
+        for (int i = 0; i < cnt; i++) 
+            if (getField (i).getName ().equals (name)) 
+                return i;
+
+        return -1;
+    }
 
     public abstract void close();
 
@@ -73,7 +80,7 @@ public abstract class DbTable {
      * Select all.
      */
     public DbRecord select(boolean updated) throws DbException {
-        return select(null, -1, false, updated);
+         return select(null, -1, false, updated);
     }
 
     public abstract DbRecord select (Object id) throws DbException;

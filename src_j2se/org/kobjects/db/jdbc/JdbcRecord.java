@@ -11,17 +11,19 @@ class JdbcRecord implements DbRecord {
 	int [] fields;
 	int [] fieldMap;
 	Object [] current;
+	boolean empty;
 
 	// !!!!!!!!! Need a "current" Object array because of getRowCount issue
 
     /**
      * Constructor for JdbcRecord.
      */
-    public JdbcRecord(JdbcTable table, int [] fields, ResultSet resultSet) {
+    public JdbcRecord(JdbcTable table, int [] fields, ResultSet resultSet) throws SQLException {
 		this.table = table;
 		this.fields = fields;
 		this.resultSet = resultSet;
 
+		empty = !resultSet.isBeforeFirst ();
 		current = new Object [table.getFieldCount ()];
 
 		fieldMap = new int [table.getFieldCount ()]; 
@@ -233,7 +235,7 @@ class JdbcRecord implements DbRecord {
      */
     public boolean hasNext() {
 		try {
-			return !resultSet.isLast ();
+			return !(empty || resultSet.isLast () || resultSet.isAfterLast ());
 		}
 		catch (SQLException e) {
 			throw ChainedRuntimeException.create (e, null);
@@ -301,7 +303,12 @@ class JdbcRecord implements DbRecord {
      * @see DbRecord#dispose()
      */
     public void dispose() {
-		throw new RuntimeException ("NYI");
+    	try {
+			resultSet.close();
+    	}
+    	catch (SQLException e) {
+    		throw new RuntimeException (""+e);
+    	}
     }
 
     /**

@@ -265,6 +265,8 @@ public class JdbcTable implements DbTable {
         if (condition != null)
             buf.append(" where " + condition);
 
+		System.out.println ("query: "+buf.toString());
+
         try {
             return new JdbcRecord(
                 this,

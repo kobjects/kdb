@@ -40,6 +40,12 @@ public class ResultSetWrapper
         }
     }
 
+	public ResultSetWrapper(DbResultSet resultSet) {
+		this.resultSet = resultSet;
+	}
+
+
+
     /**
      * @see java.sql.ResultSet#next()
      */

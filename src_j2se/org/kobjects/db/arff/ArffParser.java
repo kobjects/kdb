@@ -46,21 +46,62 @@ public class ArffParser {
             StringBuffer buf = new StringBuffer(line);
 
             String cmd = cut(buf).toLowerCase();
-            System.out.println("command: " + cmd);
+//            System.out.println("command: " + cmd);
             if (cmd.equals("@relation"))
                 table.name = buf.toString();
             else if (cmd.equals("@attribute")) {
                 String name = cut(buf);
-                System.out.println("adding field: " + name);
-                table.addField((String) name, DbField.STRING);
-
+                String remainder = buf.toString().trim();
+                
+                String[] values = null;
+                int type;
+                
+                if (remainder.equalsIgnoreCase("real"))
+                	type = DbField.DOUBLE;
+                else if (remainder.startsWith("{")) {
+                	type = DbField.STRING;
+                	values = org.kobjects.util.Csv.decode(remainder.substring(1, remainder.length()-1));
+                }
+                else {
+                	System.err.println ("unrecognized type: '"+remainder+"' assuming string");
+					type = DbField.STRING;
+                }
+                
+                table.addField(name, type);
+                if (values != null) {
+					DbField field = table.getField(table.getFieldCount());
+					field.setProperties(null, 0, 0, values);
+                }
             }
         }
 
     }
 
     Object[] read() throws IOException {
-        String line = reader.readLine();
-        return (line != null) ? Csv.decode(line) : null;
+ 
+ 		String line;
+ 		do {   	
+	        line = reader.readLine();
+    	    if (line == null) return null;
+ 		}
+ 		while (line.startsWith("%"));
+ 		
+        String [] strings = Csv.decode(line);
+ 		Object [] objects = new Object[table.getFieldCount()];
+ 		
+ 		for (int i = 0; i < table.getFieldCount(); i++) {
+ 			int type = table.getField(i+1).getType();
+ 			switch(type) {
+ 			case DbField.DOUBLE:
+ 				objects[i] = new Double(strings[i]);
+ 				break;
+ 			case DbField.STRING:
+ 				objects[i] = strings[i];
+ 				break;
+ 			default:
+ 				throw new RuntimeException("Unsupported type "+ type);
+ 			}
+ 		}		       
+        return objects;
     }
 }

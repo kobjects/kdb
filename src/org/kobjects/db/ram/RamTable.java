@@ -10,8 +10,8 @@ public class RamTable implements DbTable {
 
     // deleted records are marked by null values
     
-    protected Vector fields;
-    protected Vector records;
+    protected Vector fields = new Vector ();
+    protected Vector records = new Vector ();
     protected Hashtable index;
     protected boolean open;
     protected boolean exists;
@@ -137,7 +137,8 @@ public class RamTable implements DbTable {
 
 	    Object [] r = (Object []) records.elementAt (i);
 
-	    if (r != null && condition.evaluate (getId (i), r)) 
+	    if (r != null 
+                && (condition == null || condition.evaluate (getId (i), r))) 
 		selected.addElement (new Integer (i));
 	}
 

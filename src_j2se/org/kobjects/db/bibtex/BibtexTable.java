@@ -9,7 +9,7 @@ import org.kobjects.db.ram.*;
 
 public class BibtexTable extends RamTable {
 
-    String fileName;
+    String filename;
     
     
     public BibtexTable () {
@@ -17,13 +17,12 @@ public class BibtexTable extends RamTable {
 
 
     public BibtexTable (String filename) {
-	connect (filename);
+	this.filename = filename;
     }
 
 
     public void connect (String connector) {
-        
-        fileName = connector;
+        filename = connector.substring (connector.indexOf (':')+1);
     }
 
      
@@ -32,7 +31,7 @@ public class BibtexTable extends RamTable {
 
         try {
             BibtexParser parser = new BibtexParser 
-                (new BufferedReader (new FileReader (fileName)));
+                (new BufferedReader (new FileReader (filename)));
             
             parser.parse ();
 	    
@@ -71,14 +70,14 @@ public class BibtexTable extends RamTable {
 
     public static void main (String argv []) throws DbException {
 	
-	DbTable table = new BibtexTable (argv [0]);
+	DbTable table = DbManager.connect ("bibtex:"+ argv [0]);
 
 	table.open ();
 
 	DbRecord r = table.select (false);
 	
-	while (r.hasNextElement ()) {
-	    r.nextElement ();
+	while (r.hasNext ()) {
+	    r.next ();
 
 	    System.out.println (r.getId ());
 	}

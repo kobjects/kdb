@@ -88,7 +88,7 @@ class BibtexParser {
         String [] entry = new String [currentEntry.size ()];
         for (int i = 0; i < currentEntry.size (); i++) {
             entry [i] = (String) currentEntry.elementAt (i);
-            System.out.println (""+entry [i]);
+            //System.out.println (""+entry [i]);
         }
 
         entries.addElement (entry);

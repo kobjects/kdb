@@ -13,11 +13,13 @@ class RamRecord implements DbRecord {
 
     Object[] values;
     boolean modified;
+    boolean deleted;
 
 
     RamRecord (RamTable table, Vector selection) {
 	this.table = table;
         this.selection = selection;
+        values = new Object [table.getFieldCount ()];
     }
 
 
@@ -28,9 +30,9 @@ class RamRecord implements DbRecord {
 
 
     public void deleteAll () throws DbException {
-        reset ();
-        while (hasNextElement ()) {
-            nextElement ();
+        beforeFirst ();
+        while (hasNext ()) {
+            next ();
             delete ();
         }
     }
@@ -77,7 +79,7 @@ class RamRecord implements DbRecord {
 
 
     public boolean isDeleted () {
-        return values == null;
+        return deleted;
     }
 
 
@@ -141,9 +143,9 @@ class RamRecord implements DbRecord {
 
 
     public void absolute(int position) throws DbException {
-        reset ();
+        beforeFirst ();
         for (int i = 0; i < position; i++)
-            nextElement ();
+            next ();
     }
 
 
@@ -186,24 +188,22 @@ class RamRecord implements DbRecord {
     }
 
 
-    public boolean hasNextElement () {
+    public boolean hasNext () {
         return selection != null && current < selection.size ()-1;
     }
 
 
-    public Object nextElement () throws DbException {
-	if (!hasNextElement ()) throw new DbException ("no next available!"); 
+    public void next () throws DbException {
+	if (!hasNext ()) throw new DbException ("no next available!"); 
 	index = ((Integer) selection.elementAt (++current)).intValue ();
 	refresh ();
-        return this;
     }
 
 
     /** Places the cursor before the first record */
 
-    public void reset () throws DbException {
-	if (selection == null) throw new DbException ("no cursor!");
-	if (selection != null) current = -1;
+    public void beforeFirst () throws DbException {
+        current = -1;
     }
 
 

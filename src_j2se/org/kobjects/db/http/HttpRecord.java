@@ -45,7 +45,7 @@ public class HttpRecord implements DbResultSet {
     }
 
     
-    public int findField(String name) {
+    public int findColumn(String name) {
         for (int i = 1; i <= getColumnCount(); i++)
             if (getField(i).getName().equals (name))
                 return i;

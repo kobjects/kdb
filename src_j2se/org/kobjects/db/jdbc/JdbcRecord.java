@@ -17,12 +17,6 @@ class JdbcRecord implements DbResultSet {
 
 	/** map from db field indices to Jdbc result set field indices */
 
-	int [] fieldMap;
-	Object [] current;
-	boolean empty;
-
-	// !!!!!!!!! Need a "current" Object array because of getRowCount issue
-
     /**
      * Constructor for JdbcRecord.
      */
@@ -36,49 +30,79 @@ class JdbcRecord implements DbResultSet {
                         ResultSet.CONCUR_UPDATABLE);
                         
 	    resultSet = statement.executeQuery(query);
-
-		empty = !resultSet.isBeforeFirst ();
-		current = new Object [table.getFieldCount ()];
-
-		fieldMap = new int [table.getFieldCount ()]; 
-		if (fields == null) {
-			for (int i = 0; i < fieldMap.length; i++) {
-				fieldMap [i] = i+1;
-			}
-		}
-		else {
-			for (int i = 0; i < fields.length; i++) {
-				fieldMap [fields [i]] = i+1;
-			}
-		}
     }
+    
+    
+    public int findColumn(String name) {
+    	try {
+    		return resultSet.findColumn(name);
+    	}
+    	catch(SQLException e) {
+    		throw new RuntimeException(e.toString());
+    	}
+    }
+    
+    public int getColumnCount() {
+    	return fields.length;
+    }
+
+
+	public int getRowCount() {
+		throw new RuntimeException ("Cached count statement NYI");	
+	}
+
+
+	public DbField getField(int column) {
+		return table.getField(fields[column-1]);	
+	}
 
     /**
      * @see DbRecord#getObject(int)
      */
+
     public Object getObject(int column) {
-		return current [column];
+    	try {
+			return resultSet.getObject(column);
+    	}
+    	catch (SQLException e) {
+    		throw new RuntimeException (e.toString());
+    	}
     }
 
     /**
      * @see DbRecord#setObject(int, Object)
      */
     public void updateObject(int column, Object value) {
-		throw new RuntimeException ("NYI");
+		try {
+			resultSet.updateObject(column,value);
+    	}
+    	catch (SQLException e) {
+    		throw new RuntimeException (e.toString());
+    	}
     }
 
     /**
      * @see DbRecord#getBoolean(int)
      */
     public boolean getBoolean(int column) {
-		return ((Boolean) getObject (column)).booleanValue();
+    	try {
+			return resultSet.getBoolean(column);
+    	}
+    	catch (SQLException e) {
+    		throw new RuntimeException (e.toString());
+    	}
     }
 
     /**
      * @see DbRecord#getInteger(int)
      */
     public int getInt(int column) {
-		return ((Integer) getObject (column)).intValue();
+    	try {
+			return resultSet.getInt(column);
+    	}
+    	catch (SQLException e) {
+    		throw new RuntimeException (e.toString());
+    	}
     }
 
     /**
@@ -106,7 +130,12 @@ class JdbcRecord implements DbResultSet {
      * @see DbRecord#getBinary(int)
      */
     public InputStream getBinaryStream(int column) {
-		return (InputStream) getObject (column);	
+    	try {
+    		return resultSet.getBinaryStream(column);
+    	}
+    	catch(SQLException e) {
+    		throw new RuntimeException (e.toString());
+    	}
     }
 
     /**
@@ -143,37 +172,30 @@ class JdbcRecord implements DbResultSet {
     public void updateBinaryStream(int column, InputStream value) {
 		updateObject (column, value);
     }
-
+/*
 	Object getObj (int column) throws SQLException {
-		int dbc = fieldMap [column];
-		if (dbc == 0) {
-			//System.out.println ("fieldMap ["+column+"] = null!!!");
-			return null;
-		}
+		
 		switch (table.getField (column).getType ()) {
 			
-			case DbField.STRING: return resultSet.getString (dbc);
-			case DbField.DOUBLE: return new Double (resultSet.getDouble(dbc));
-			case DbField.INTEGER: return new Integer (resultSet.getInt (dbc));
-			case DbField.LONG: return new Long (resultSet.getLong(dbc)); 
-			case DbField.DATETIME: return resultSet.getDate(dbc);
+			case DbField.STRING: return resultSet.getString (column);
+			case DbField.DOUBLE: return new Double (resultSet.getDouble(column));
+			case DbField.INTEGER: return new Integer (resultSet.getInt (column));
+			case DbField.LONG: return new Long (resultSet.getLong(column)); 
+			case DbField.DATETIME: return resultSet.getDate(column);
 			default: 
 				System.err.println ("returning null for NYI type: "
 					+table.getField (column).getType ());
 				return null;
 		}			
 	}
-
+*/
 
     /**
      * @see DbRecord#refresh()
      */
     public void refreshRow() throws DbException {
 		try {
-			for (int i = 0; i < fieldMap.length; i++) {
-				current [i] = getObj (i);
-				//System.out.println ("current ["+i+"]="+current [i]);
-			}
+			resultSet.refreshRow();
 		}
 		catch (SQLException e) {
 			throw new DbException (""+e);
@@ -184,7 +206,12 @@ class JdbcRecord implements DbResultSet {
      * @see DbRecord#update()
      */
     public void updateRow() throws DbException {
-		throw new RuntimeException ("NYI");
+		try {
+			resultSet.updateRow();
+		}
+		catch (SQLException e) {
+			throw new DbException (""+e);
+		}
     }
 
     /**
@@ -194,10 +221,7 @@ class JdbcRecord implements DbResultSet {
 		throw new RuntimeException ("NYI");
     }
 
-    /**
-     * @see DbRecord#insert(Object[])
-     */
-    public void insert(Object[] values) throws DbException {
+    public void insertRow() throws DbException {
 		throw new RuntimeException ("NYI");
     }
 
@@ -255,12 +279,20 @@ class JdbcRecord implements DbResultSet {
 		}
     }
 
-    /**
-     * @see DbRecord#hasNext()
-     */
-    public boolean hasNext() {
+
+    public boolean isLast() {
 		try {
-			return !(empty || resultSet.isLast () || resultSet.isAfterLast ());
+			return resultSet.isLast ();
+		}
+		catch (SQLException e) {
+			throw ChainedRuntimeException.create (e, null);
+		}
+    }
+
+    
+    public boolean isAfterLast() {
+		try {
+			return resultSet.isAfterLast ();
 		}
 		catch (SQLException e) {
 			throw ChainedRuntimeException.create (e, null);
@@ -270,35 +302,16 @@ class JdbcRecord implements DbResultSet {
     /**
      * @see DbRecord#next()
      */
-    public void next() throws DbException {
+    public boolean next() throws DbException {
 		try {
-			if (!resultSet.next())
-				throw new DbException ("Read past eof");
-
-			refreshRow ();
-		}
+			return resultSet.next();
+        }
 		catch (SQLException e) {
-			throw new DbException (""+e);
+			throw new DbException (e.toString());
 		}
     }
 
-    /**
-     * @see DbRecord#getRowCount()
-     */
-    public int getRowCount() {
-		try {
-			int save = resultSet.getRow();
-			resultSet.absolute (-1);
-			int result = resultSet.getRow ();
-			if (save == 0) resultSet.beforeFirst ();
-			else resultSet.absolute (save);
-			return result;
-		}
-		catch (SQLException e) {
-			throw ChainedRuntimeException.create (e, null);
-		}		
-    }
-
+    
     /**
      * @see DbRecord#getRow()
      */

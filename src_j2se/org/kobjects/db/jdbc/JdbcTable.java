@@ -153,7 +153,7 @@ public class JdbcTable implements DbTable {
 
     public int findField(String name) {
         int cnt = getFieldCount();
-        for (int i = 0; i < cnt; i++)
+        for (int i = 1; i <= cnt; i++)
             if (getField(i).getName().equals(name))
                 return i;
 
@@ -165,7 +165,7 @@ public class JdbcTable implements DbTable {
         if (i != -1)
             return getField(i);
 
-        DbField f = new DbField(this, fields.size(), name, type);
+        DbField f = new DbField(this, fields.size()+1, name, type);
         fields.addElement(f);
         return f;
     }
@@ -235,7 +235,7 @@ public class JdbcTable implements DbTable {
     }
 
     public DbField getField(int index) {
-        return (DbField) fields.elementAt(index);
+        return (DbField) fields.elementAt(index-1);
     }
 
     public int getFieldCount() {

@@ -33,7 +33,7 @@ public interface DbResultSet {
 	
 	public DbField getField(int column);
 	
-	public int findField(String name);
+	public int findColumn(String name);
 
     public int getInt(int column);
 

@@ -9,6 +9,8 @@ package org.kobjects.db.bibtex;
 
 
 import java.util.*;
+import java.io.*;
+import org.kobjects.db.*;
 import org.kobjects.db.ram.*;
 
 /**
@@ -16,9 +18,35 @@ import org.kobjects.db.ram.*;
 
 public class BibtexRecord extends RamRecord {
 
+	BibtexTable table;
 
 	BibtexRecord(BibtexTable table, Vector selected, int[] fields) {
 		super(table, selected, fields);
+		this.table = table;
+	}
+
+
+
+	public Object getObject (int index)  {
+		if (index < table.fileIndex) 
+			return super.getObject(index);
+
+		try {
+			
+			File file = new File 
+				(table.documentDir, 
+				 values[table.keyIndex]
+				 +"."
+				 +table.getField(index).getName().substring (0, 3));
+			
+			System.out.println("trying file: "+file);
+			
+			return new FileInputStream 
+				(file); 
+		}
+		catch(IOException e) {
+			throw new RuntimeException (e.toString());
+		}
 	}
 
 }

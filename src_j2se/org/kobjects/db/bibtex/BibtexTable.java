@@ -17,10 +17,14 @@ public class BibtexTable extends RamTable implements Runnable {
     protected String filename;
     protected String documentDir;
     protected long lastModified;
+    int fileIndex = -1;
+    int keyIndex = -1;
     
     static final String[] DEFAULT_FIELDS =
         {
             "author",
+            "id",
+            "key",
             "booktitle",
             "editor",
             "year",
@@ -110,15 +114,11 @@ public class BibtexTable extends RamTable implements Runnable {
                                     .fieldNames
                                     .elementAt(
                                 i);
-                        if ("id".equals(name))
-                            setIdField(i);
+
                         addField(name, DbField.STRING);
                     }
 
-                    if (idField == -1) {
-                        setIdField(getFieldCount());
-                        addField("id", DbField.STRING);
-                    }
+				
 
                     for (int i = 0;
                         i < DEFAULT_FIELDS.length;
@@ -129,8 +129,11 @@ public class BibtexTable extends RamTable implements Runnable {
                                 DbField.STRING);
                     }
                     
-                    addField("pdfFile", DbField.BINARY);
+					setIdField (findField("id"));
+					keyIndex = findField("key");
                     
+					fileIndex = getFieldCount();                    
+                    addField("pdfFile", DbField.BINARY);                    
                 }
 
                 // ensure equal record sizes
@@ -142,8 +145,8 @@ public class BibtexTable extends RamTable implements Runnable {
                     Object[] r =
                         (Object[]) parser.entries.elementAt(i);
 
-                    if (r.length < getFieldCount()) {
-                        Object[] n = new Object[getFieldCount()];
+                    if (r.length < fileIndex) {
+                        Object[] n = new Object[fileIndex];
                         for (int j = 0; j < r.length; j++)
                             n[j] = r[j];
 

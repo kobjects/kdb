@@ -5,7 +5,7 @@ import org.kobjects.db.*;
 
 
 
-public class RamTable extends DbTable {
+public class RamTable implements DbTable {
 
 
     // deleted records are marked by null values
@@ -19,16 +19,31 @@ public class RamTable extends DbTable {
     protected int [] idFields;
 
 
-    public void init (String connector) {
+    public void connect (String connector) {
         //if (name != null) 
         //   throw new DbException ("connector must be null!");
     }
 
 
+    public int findField(String name) {
+        int cnt = getFieldCount ();
+        for (int i = 0; i < cnt; i++) 
+            if (getField (i).getName ().equals (name)) 
+                return i;
+
+        return -1;
+    }
+
+
     public DbField addField (String name, int type) {
-        DbField f = new DbField (fields.size (), name, type);
+        DbField f = new DbField (this, fields.size (), name, type);
         fields.addElement (f);
         return f;
+    }
+
+
+    public boolean isOpen () {
+        return open;
     }
 
 
@@ -47,6 +62,12 @@ public class RamTable extends DbTable {
 	
 	return buf.toString ();
     }
+
+
+    public String getName () {
+        return "RamTable";
+    }
+
 
     public void open () throws DbException {
 	checkOpen (false);
@@ -101,6 +122,11 @@ public class RamTable extends DbTable {
     }
 
 
+    public DbRecord select (boolean updated) {
+        return select (null, -1, false, updated);
+    }
+
+
     public DbRecord select (DbCondition condition, int sortfield, boolean inverse, boolean updated) {
 
 	Vector selected = new Vector ();
@@ -109,7 +135,7 @@ public class RamTable extends DbTable {
 
 	    Object [] r = (Object []) records.elementAt (i);
 
-	    if (r != null && condition.evaluate (r)) 
+	    if (r != null && condition.evaluate (getId (i), r)) 
 		selected.addElement (new Integer (i));
 	}
 

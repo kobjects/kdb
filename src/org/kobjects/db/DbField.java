@@ -113,12 +113,12 @@ public class DbField {
     private Object defValue;
 
     /**
-     * Creates a new field. This constructor is package-visible. From a user's
-     * perspective, new fields are created using the table's <code>addField()</code>
-     * factory method.
+     * Creates a new field.  From a user's perspective, new fields are
+     * created using the table's <code>addField()</code> factory
+     * method.
      */
 
-    DbField(DbTable table, int number, String name, int type) {
+    public DbField(DbTable table, int number, String name, int type) {
         this.table = table;
         this.number = number;
         this.name = name;

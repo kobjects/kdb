@@ -59,6 +59,8 @@ public class DbField {
      * interface.
      */
     public static final byte GRAPHICS = 8;
+    
+    public static final byte DOUBLE = 9;
 
     /**
      * Holds the table this field belongs to.

@@ -169,6 +169,7 @@ public class BibtexTable extends RamTable implements Runnable {
     }
 
     public synchronized void rewrite() throws DbException {
+        System.out.println("BibtexTable: rewrite() triggered");
         try {
             File nf = new File(filename + ".new");
             BufferedWriter w =
@@ -188,7 +189,7 @@ public class BibtexTable extends RamTable implements Runnable {
         catch (IOException e) {
             throw new DbException("" + e);
         }
-
+        System.out.println("BibtexTable: rewrite() finished");
     }
     
 

@@ -236,9 +236,9 @@ public class DbCondition {
                 case GT: return f + " > " + v;
                 case LE: return f + " <= " + v;
                 case GE: return f + " >= " + v;
-                case EQ: return f + " == " + v;
+                case EQ: return f + " = " + v;
                 case NE: return f + " != " + v;
-                case EQ_TEXT: return f + " = " + v;
+                case EQ_TEXT: throw new RuntimeException ("NYI");//return f + " = " + v;
 			    default: throw new RuntimeException ("illegal operator: "+operator);
             }
         }

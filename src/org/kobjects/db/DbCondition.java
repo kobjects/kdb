@@ -227,7 +227,7 @@ public class DbCondition {
     public String toString () {
 
         if (operator < AND) {
-            String f = field == -1 ? "#id" : table.getField (field).getName ();
+            String f = table.getField (field).getName ();
 
 			String v = value instanceof String ? "\""+value+"\"" : ""+value;
 

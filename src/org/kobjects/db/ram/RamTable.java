@@ -19,7 +19,7 @@ public class RamTable implements DbTable {
     protected int [] idFields;
 
 
-    public void connect (String connector) {
+    public void connect (String connector) throws DbException {
         //if (name != null) 
         //   throw new DbException ("connector must be null!");
     }
@@ -36,7 +36,10 @@ public class RamTable implements DbTable {
 
 
     public DbField addField (String name, int type) {
-        DbField f = new DbField (this, fields.size (), name, type);
+    	int i = findField (name);
+    	if (i != -1) return getField (i);
+    	
+    	DbField f = new DbField (this, fields.size (), name, type);	
         fields.addElement (f);
         return f;
     }
@@ -70,13 +73,14 @@ public class RamTable implements DbTable {
 
 
     public void open () throws DbException {
-	checkOpen (false);
+    	if (!exists) throw new DbException ("Does not exist!");
+		checkOpen (false);
         open = true;
     }
 
 
     public void create () throws DbException {
-	checkOpen (false);
+		checkOpen (false);
         exists = true;
     }
 

@@ -11,7 +11,7 @@ package org.kobjects.db;
 
 import java.io.*;
 import java.util.*;
-import javax.microedition.rms.*;
+//import javax.microedition.rms.*;
 
 /**
  * Represents a database table.
@@ -23,7 +23,7 @@ public interface DbTable {
      * the syntax used in the connect() factory method, so the actual table
      * name has to be derived from it.
      */
-    public void connect(String connector);
+    public void connect(String connector) throws DbException;
 
     /**
      * Returns the table's name.

@@ -29,7 +29,7 @@ package org.kobjects.db;
 
 import java.io.*;
 import java.util.*;
-import javax.microedition.rms.*;
+//import javax.microedition.rms.*;
 
 /**
  * Represents a record in a table. Actually, this class resembles an SQL result

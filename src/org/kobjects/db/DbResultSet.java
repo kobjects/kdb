@@ -28,6 +28,8 @@ public interface DbResultSet {
     public void updateObject(int column, Object value);
 
     public boolean getBoolean(int column);
+    
+     public byte[] getBytes(int column);
 
 	public int getColumnCount();
 	
@@ -52,13 +54,15 @@ public interface DbResultSet {
 
     public void updateBoolean(int column, boolean value);
 
-    public void updateInteger(int column, int value);
+    public void updateInt(int column, int value);
 
     public void updateLong(int column, long value);
 
     public void updateString(int column, String value);
 
     public void updateBinaryStream(int column, InputStream value);
+    
+    public void updateBytes(int column, byte[] data);
 
     public void refreshRow() throws DbException;
 
@@ -135,4 +139,9 @@ public interface DbResultSet {
      * indices, or null, if all fields are selected 
 
     public int [] getSelectedFields (); */
+    
+	public boolean isKeptUpdated();
+
+	public boolean isSorted();
+
 }

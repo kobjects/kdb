@@ -110,8 +110,8 @@ public interface DbTable {
      * the whole result set is kept updated or not. The returned
      * result set is positioned before the first record.  */
 
-    public DbResultSet select(int [] fields, DbCondition filter, 
-			   int oderBy, boolean reverse, 
+    public DbResultSet select(int[] fields, DbCondition filter, 
+			   int[] orderBy, boolean reverse, 
 			   boolean updated) throws DbException;
 }
 

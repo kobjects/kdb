@@ -12,6 +12,16 @@ import org.kobjects.db.*;
  */
 public class Ls8bibTable extends BibtexTable {
 
+	// let run do nothing
+
+
+	public void run () {
+	}
+
+	// let rewrite do nothing
+
+	public void rewrite() {
+	}
 
 	protected void update (int index, Object[] entry) throws DbException {
 
@@ -28,9 +38,5 @@ public class Ls8bibTable extends BibtexTable {
 	}
 
 
-	/** Dont do anything on close */
-
-	public void close () {		
-	}
 
 }

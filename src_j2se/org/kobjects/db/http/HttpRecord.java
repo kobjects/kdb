@@ -149,39 +149,24 @@ public class HttpRecord implements DbRecord {
         try {
             StringBuffer url = new StringBuffer(table.url);
             url.append(table.conjunction);
-            url.append("cmd=update&fields=");
-            boolean first = true;
-            StringBuffer buf = new StringBuffer();
-            for (int i = 0; i < content.length; i++) {
-                if ((content[i] != values[i])
-                    && (content[i] == null || !content[i].equals(values[i]))) {
-                    if (first)
-                        first = false;
-                    else {
-                        buf.append(',');
-                        url.append(',');
-                    }
-    
-                    buf.append('"');
-                    buf.append(values[i]);
-                    buf.append('"');
-                    url.append(table.getField(i).getName());
-                    
-                    content[i] = values[i];
-                }
-            }
-            url.append("&where=id=");
+            url.append("cmd=update&where=id=");
             url.append(values[table.idField]);
-            
+
             HttpURLConnection connection =
                 (HttpURLConnection) new URL(url.toString ())
                     .openConnection();
 
-            OutputStream os = connection.getOutputStream();
-
-            os.write(buf.toString().getBytes());
-            os.write('\r');
-            os.write('\n');            
+            BufferedWriter w = new BufferedWriter (new OutputStreamWriter (connection.getOutputStream()));
+            
+            for (int i = 0; i < content.length; i++) {
+                if ((content[i] != values[i])
+                    && (content[i] == null || !content[i].equals(values[i]))) {
+                    w.write (table.getField(i).getName()+"="+ values[i]+"\r\n");
+                    content[i] = values[i];
+                }
+            }
+            w.write ("\r\n");
+            w.close();            
         }
         catch (Exception e) {
             throw new DbException(e.toString());

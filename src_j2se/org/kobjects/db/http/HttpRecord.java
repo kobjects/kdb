@@ -102,12 +102,14 @@ public class HttpRecord implements DbRecord {
 	}
 
 	public void insert() throws DbException {
+        throw new RuntimeException ("NYI");
+/*
 		modified = true;
 
 		int cnt = table.getFieldCount();
 		for (int i = 0; i < cnt; i++) {
 			values[i] = table.getField(i).getDefault();
-		}
+		}*/
 	}
 
 	public void insert(Object[] values) throws DbException {
@@ -144,9 +146,9 @@ public class HttpRecord implements DbRecord {
 		throw new RuntimeException("NYI");
 	}
 
-	public Object getId() {
+	/*public Object getId() {
 		return (table.getId(values));
-	}
+	}*/
 
 	public int getRow() {
 		return current + 1;

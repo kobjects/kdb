@@ -12,7 +12,7 @@ public class HttpTableSE implements DbTable {
     String url;
     String name;
     Vector fields = new Vector();
-    int[] idFields;
+   // int[] idFields;
     char conjunction;
     boolean exists;
     boolean open;
@@ -67,7 +67,7 @@ public class HttpTableSE implements DbTable {
                 addField(f[0], Field.STRING);
             }
 
-            // determine primaryKey			
+            /* determine primaryKey			
             connection =
                 (HttpURLConnection) new URL(url
                     + conjunction
@@ -88,6 +88,8 @@ public class HttpTableSE implements DbTable {
                     "id field is: " + key + " index: " + index);
                 setIdFields(new int[] { index });
             }
+            */
+
             exists = true;
 
         }
@@ -128,7 +130,7 @@ public class HttpTableSE implements DbTable {
     public boolean isOpen() {
         return open;
     }
-
+/*
     protected Object getId(Object[] record) {
         if (idFields == null)
             throw new RuntimeException("ID must be defined for HTTPConnection!");
@@ -139,7 +141,7 @@ public class HttpTableSE implements DbTable {
 
         return buf.toString();
     }
-
+*/
     public DbField getField(int index) {
         return (DbField) fields.elementAt(index);
     }
@@ -181,10 +183,10 @@ public class HttpTableSE implements DbTable {
 
             if (fields != null) {
                 buf.append("&fields=");
-                buf.append(fields[0]);
+                buf.append(getField (fields[0]).getName());
                 for (int i = 1; i < fields.length; i++) {
                     buf.append(",");
-                    buf.append(fields[i]);
+                    buf.append(getField (fields[i]).getName());
                 }
             }
             if (condition != null) {
@@ -193,13 +195,7 @@ public class HttpTableSE implements DbTable {
             }
 
             HttpURLConnection connection =
-                (HttpURLConnection) new URL(url
-                    + conjunction
-                    + "cmd=select"
-                    + (condition != null
-                        ? "&where="
-                            + urlEncode(condition.toString())
-                        : ""))
+                (HttpURLConnection) new URL(buf.toString ())
                     .openConnection();
 
             InputStream is = connection.getInputStream();
@@ -234,10 +230,12 @@ public class HttpTableSE implements DbTable {
         }
     }
 
+/*
     public void setIdFields(int[] idFields) throws DbException {
         checkOpen(false);
         this.idFields = idFields;
     }
+*/
 
     public void open() {
         open = true;

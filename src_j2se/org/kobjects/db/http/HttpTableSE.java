@@ -176,6 +176,15 @@ public class HttpTableSE implements DbTable {
 		}
 	}
 
+	static String urlEncode (String s) {
+		StringBuffer buf = new StringBuffer ();
+		for (int i = 0; i < s.length (); i++) {
+			char c = s.charAt (i);
+			if (c==' ') buf.append ("%20");
+			else buf.append (c);
+		}
+		return buf.toString ();	
+	}
 
 	public DbRecord select (
 		DbCondition condition,
@@ -186,7 +195,10 @@ public class HttpTableSE implements DbTable {
 			
 		try {			
 			HttpURLConnection connection =
-				(HttpURLConnection) new URL(url + conjunction + "cmd=select").openConnection();
+				(HttpURLConnection) new URL(url + conjunction + "cmd=select" 
+				    + (condition != null 
+				       ? "&where="+urlEncode (condition.toString ()) 
+				       : "")).openConnection();
 
 			InputStream is = connection.getInputStream();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(is));

@@ -26,25 +26,30 @@ public class BibtexTable extends RamTable {
                 (new BufferedReader (new FileReader (fileName)));
             
             parser.parse ();
-            
-            records = parser.entries;
-            
+	    
             for (int i = 0; i < parser.fieldNames.size (); i++) {
                 
                 addField ((String) parser.fieldNames.elementAt (i), DbField.STRING);
+
             } 
+
+	    setIdFields (new int [] {1});
+
             
 	    // ensure equal record sizes
 
-	    for (int i = 0; i < records.size (); i++) {
-		Object [] r = (Object []) records.elementAt (i);
+	    for (int i = 0; i < parser.entries.size (); i++) {
+		Object [] r = (Object []) parser.entries.elementAt (i);
 		if (r.length < getFieldCount ()) {
 		    Object [] n = new Object [getFieldCount ()];
 		    for (int j = 0; j < r.length; j++) 
 			n [j] = r [j];
 
-		    records.setElementAt (n, i);
+		    r = n;
 		}
+
+		records.addElement (r);
+		index.put (getId (i), new Integer (i));
 	    }
 
             open = true;

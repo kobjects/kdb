@@ -12,11 +12,11 @@ public class RamTable extends DbTable {
     
     protected Vector fields;
     protected Vector records;
-    //    protected Hashtable index;
+    protected Hashtable index;
     protected boolean open;
     protected boolean exists;
 
-    //    protected int [] idFields;
+    protected int [] idFields;
 
 
     public void init (String connector) {
@@ -32,12 +32,30 @@ public class RamTable extends DbTable {
     }
 
 
+    protected void checkOpen (boolean required) throws DbException {
+	if (open != required) throw new DbException 
+	    ("DB must "+(required ? "" : "not ")+"be open");
+    }
+
+
+    protected Object getId (int index) {
+	if (idFields == null) return new Integer (index);
+	Object [] record = (Object[]) records.elementAt (index); 
+	StringBuffer buf = new StringBuffer ();
+	for (int i = 0; i < idFields.length; i++) 
+	    buf.append (record [idFields [i]].toString ());
+	
+	return buf.toString ();
+    }
+
     public void open () throws DbException {
+	checkOpen (false);
         open = true;
     }
 
 
-    public void create () {
+    public void create () throws DbException {
+	checkOpen (false);
         exists = true;
     }
 
@@ -74,7 +92,12 @@ public class RamTable extends DbTable {
 
 
     public DbRecord select (Object id) {
-	return new RamRecord (this, ((Integer) id).intValue ());
+	Vector selected = new Vector ();
+	
+	if (idFields == null) 
+	    selected.addElement (idFields == null ? id : index.get (id));
+
+	return new RamRecord (this, selected);
     }
 
 
@@ -87,7 +110,7 @@ public class RamTable extends DbTable {
 	    Object [] r = (Object []) records.elementAt (i);
 
 	    if (r != null && condition.evaluate (r)) 
-		selected.addElement (r);
+		selected.addElement (new Integer (i));
 	}
 
 	if (sortfield != -1 || updated) 
@@ -95,6 +118,15 @@ public class RamTable extends DbTable {
 
 	return new RamRecord (this, selected);
     }
+
+    
+    public void setIdFields (int [] idFields) throws DbException {
+	
+	checkOpen (false);
+	this.idFields = idFields;
+	index = new Hashtable ();
+    }
+
 }
 
 

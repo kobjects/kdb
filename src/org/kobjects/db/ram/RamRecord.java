@@ -6,17 +6,10 @@ import org.kobjects.db.*;
 class RamRecord extends DbRecord {
 
     Vector selection;
-    int index = -1;
-    int id;  // id in records vector
+    int current = -1;
+    int index;  // index in records vector
     RamTable table;
 
-
-    RamRecord (RamTable table, int id) {
-	this.table = table;
-	this.id = id;
-	refresh ();
-    }
-    
 
     RamRecord (RamTable table, Vector selection) {
 	this.table = table;
@@ -25,7 +18,7 @@ class RamRecord extends DbRecord {
 
 
     public void refresh () {
-	Object [] content = (Object []) table.records.elementAt (id);
+	Object [] content = (Object []) table.records.elementAt (index);
 	for (int i = 0; i < content.length; i++) 
 	    values [i] = content [i];
 
@@ -38,7 +31,7 @@ class RamRecord extends DbRecord {
 	for (int i = 0; i < values.length; i++) 
 	    content [i] = values [i];
 
-	table.records.setElementAt (content, id);
+	table.records.setElementAt (content, index);
     }
 
 
@@ -48,7 +41,7 @@ class RamRecord extends DbRecord {
 
 
     public Object getId () {
-	return new Integer (id);
+	return (table.getId (index));
     }
 
 
@@ -58,13 +51,13 @@ class RamRecord extends DbRecord {
 
 
     public boolean hasNext () {
-        return selection != null && index < selection.size ()-1;
+        return selection != null && current < selection.size ()-1;
     }
 
 
     public void next () throws DbException {
 	if (!hasNext ()) throw new DbException ("no next available!"); 
-	id = ((Integer) selection.elementAt (++index)).intValue ();
+	index = ((Integer) selection.elementAt (++current)).intValue ();
 	refresh ();
     }
 
@@ -73,7 +66,7 @@ class RamRecord extends DbRecord {
 
     public void reset () throws DbException {
 	if (selection == null) throw new DbException ("no cursor!");
-	if (selection != null) index = -1;
+	if (selection != null) current = -1;
     }
 
 

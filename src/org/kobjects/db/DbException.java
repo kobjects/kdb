@@ -6,7 +6,7 @@ package org.kobjects.db;
  * <p>Description: </p>
  * <p>Copyright: Copyright (c) 2002</p>
  * <p>Company: </p>
- * @author unascribed
+ * @author Jörg Pleumann
  * @version 1.0
  */
 

@@ -5,7 +5,7 @@ package org.kobjects.db;
  * <p>Description: </p>
  * <p>Copyright: Copyright (c) 2002</p>
  * <p>Company: </p>
- * @author unascribed
+ * @author Jörg Pleumann
  * @version 1.0
  */
 
@@ -69,7 +69,7 @@ public class DbExpression {
         this.children = children;
     }
 
-    void setTable(DbTable table) {
+    public void setTable(DbTable table) {
         System.out.println("setTable(): " + this.toString());
 
         if (operator >= AND) {
@@ -82,7 +82,7 @@ public class DbExpression {
         }
     }
 
-    boolean evaluate(Object[] record) {
+    public boolean evaluate(Object[] record) {
         System.out.println("evaluate(): " + this.toString() + " of type " + operator);
 
         if (operator < AND) {
@@ -147,7 +147,7 @@ public class DbExpression {
         return false; // Dummy
     }
 
-    static int compare(int type, Object actual, Object formal) {
+    public static int compare(int type, Object actual, Object formal) {
         System.out.println("compare(): " + actual + " / " + formal);
 
         switch (type) {

@@ -16,6 +16,7 @@ public class HttpTableSE implements DbTable {
     char conjunction;
     boolean exists;
     boolean open;
+    int idField = -1;
 
     public HttpTableSE() {
     }
@@ -64,7 +65,23 @@ public class HttpTableSE implements DbTable {
                 if (line == null)
                     break;
                 String[] f = Csv.decode(line);
+                
+                System.out.println("line: "+line);
+                for (int i = 0; i < f.length; i++) {
+                    System.out.println ("part "+i+": "+f[i]);
+                }
+                
                 addField(f[0], Field.STRING);
+                // 1 type
+                // 2 len
+                // 3 dec
+                // 4 isId
+                if ("true".equals(f[4])) {
+                    if (idField != -1) 
+                        System.err.println ("Only first ID field was accepted!");
+                    else
+                        idField = getFieldCount()-1;
+                }
             }
 
             /* determine primaryKey			
@@ -111,7 +128,7 @@ public class HttpTableSE implements DbTable {
     }
 
     public int getIdField() {
-        return -1;
+        return idField;
     }
 
     public int findField(String name) {
@@ -184,9 +201,15 @@ public class HttpTableSE implements DbTable {
             if (fields != null) {
                 buf.append("&fields=");
                 buf.append(getField (fields[0]).getName());
+                boolean addId = idField != -1;
                 for (int i = 1; i < fields.length; i++) {
                     buf.append(",");
+                    if (fields [i] == idField) addId = false;
                     buf.append(getField (fields[i]).getName());
+                }
+                if (addId) {
+                    buf.append(",");
+                    buf.append(getField (idField).getName());
                 }
             }
             if (condition != null) {

@@ -105,8 +105,7 @@ public class Mp3Table extends RamTable {
         table.open();
         DbResultSet record = table.select(false);
 
-        while (record.hasNext()) {
-            record.next();
+        while (record.next()) {
             for (int i = 0; i < table.getFieldCount() - 1; i++) {
                 System.out.println(record.getString(i));
             }

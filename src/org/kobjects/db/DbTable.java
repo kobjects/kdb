@@ -17,23 +17,35 @@ import javax.microedition.rms.*;
 
 public abstract class DbTable {
 
-
-    protected boolean open;
-
-
     protected Vector fields = new Vector();
 
-
-
     public abstract boolean exists();
-
 
     /**
      * Factory method mit load by name? Braucht wohl zweite Methode zum
      * connecten. Namensschema: Db<typ>Table, mit <typ> erster Buchstabe groﬂ, Rest
      * klein.
      */
-    public abstract void connect (String connector);
+    public static DbTable connect(String connector) throws DbException {
+        try {
+            int p = connector.indexOf(':');
+            String proto = connector.substring(0, p);
+            String cls   = Character.toUpperCase(proto.charAt(0)) + proto.substring(1);
+            if ("https".equals(cls)) cls = "http";
+
+            System.out.println(proto + " / " + cls + " org.kobjects.db." + proto + "." + cls + "Table");
+
+            DbTable table = (DbTable)Class.forName("org.kobjects.db." + proto + "." + cls + "Table").newInstance();
+            table.init(connector);
+
+            return table;
+        }
+        catch (Exception e) {
+            throw new DbException("Can't connect to table \"" + connector + "\" (" + e.getClass().getName() + ")");
+        }
+    }
+
+    protected abstract void init(String connector);
 
 
     public abstract void delete() throws DbException;
@@ -79,34 +91,22 @@ public abstract class DbTable {
         return -1;
     }
 
-
     public abstract void close();
 
+    /**
+     * To delete records without having to refresh them first. This method's
+     * semantics is as follows: select(id).next.delete();
+     */
+    public abstract void deleteRecord(Object id) throws DbException;
 
-    /*
-    public void deleteRecord(int id) throws DbException {
-        checkOpen(true);
-        saveRecord(id, null);
+    /**
+     * Select all.
+     */
+    public DbRecord select(boolean updated) throws DbException {
+        return select(null, -1, false, updated);
     }
-    */
-
 
     public abstract DbRecord select (Object id) throws DbException;
 
-
     public abstract DbRecord select (DbCondition filter, int orderField, boolean orderReverse, boolean updated) throws DbException;
-    /* {
-        checkOpen(true);
-
-        try {
-            DBIndex index = new DBIndex(this);
-            index.setFilter(filter);
-            if (orderField != -1) index.setOrder(orderField, orderReverse);
-            RecordEnumeration enum = store.enumerateRecords(index, (orderField != -1 ? index : null), updated);
-            return new DBRecord(this, enum);
-        }
-        catch (RecordStoreException e) {
-            throw new DbException("Error selecting from table " + name + " (" + e.getClass().getName() + ")");
-        }
-        }*/
 }

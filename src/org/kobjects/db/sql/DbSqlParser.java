@@ -46,7 +46,7 @@ public class DbSqlParser {
         this.table = table;
     }
 
-    public DbExpression parse(String sql) throws DbException {
+    public DbCondition parse(String sql) throws DbException {
         int sqlLen = sql.length();
         buffer = new char[sqlLen + 1];
         sql.getChars(0, sqlLen, buffer, 0);
@@ -78,9 +78,9 @@ public class DbSqlParser {
 
             tokenText = new String(buffer, tokenPos, bufferPos - tokenPos);
 
-            if ("AND".equals(tokenText)) tokenType = DbExpression.AND;
-            else if ("OR".equals(tokenText)) tokenType = DbExpression.OR;
-            else if ("NOT".equals(tokenText)) tokenType = DbExpression.NOT;
+            if ("AND".equals(tokenText)) tokenType = DbCondition.AND;
+            else if ("OR".equals(tokenText)) tokenType = DbCondition.OR;
+            else if ("NOT".equals(tokenText)) tokenType = DbCondition.NOT;
             else if ("TRUE".equals(tokenText)) tokenType = BOOLEAN;
             else if ("FALSE".equals(tokenText)) tokenType = BOOLEAN;
             else if ("NULL".equals(tokenText)) tokenType = NULL;
@@ -122,39 +122,39 @@ public class DbSqlParser {
 
         else if (c == '=') {
             bufferPos++;
-            tokenType = DbExpression.EQ;
+            tokenType = DbCondition.EQ;
         }
 
         else if (c == '~') {
             bufferPos++;
-            tokenType = DbExpression.EQIC;
+            tokenType = DbCondition.EQIC;
         }
 
         else if (c == '<') {
             if (buffer[++bufferPos] == '=') {
                 bufferPos++;
-                tokenType = DbExpression.LEQ;
+                tokenType = DbCondition.LEQ;
             }
-            tokenType = DbExpression.LT;
+            tokenType = DbCondition.LT;
         }
 
         else if (c == '>') {
             if (buffer[++bufferPos] == '=') {
                 bufferPos++;
-                tokenType = DbExpression.GEQ;
+                tokenType = DbCondition.GEQ;
             }
-            tokenType = DbExpression.GT;
+            tokenType = DbCondition.GT;
         }
 
         System.out.println("nextToken(): " + tokenText);
     }
 
-    private DbExpression parseExpression() throws DbException {
+    private DbCondition parseExpression() throws DbException {
         Vector vector = new Vector();
 
         vector.addElement(parseTerm());
 
-        while (tokenType == DbExpression.OR) {
+        while (tokenType == DbCondition.OR) {
             nextToken();
             vector.addElement(parseExpression());
         }
@@ -164,42 +164,42 @@ public class DbSqlParser {
         }
 
         if (vector.size() != 0) {
-            DbExpression[] array = new DbExpression[vector.size()];
+            DbCondition[] array = new DbCondition[vector.size()];
             for (int i = 0; i < vector.size(); i++) {
-                array[i] = (DbExpression)vector.elementAt(i);
+                array[i] = (DbCondition)vector.elementAt(i);
             }
 
-            return new DbExpression(DbExpression.OR, array);
+            return new DbCondition(DbCondition.OR, array);
         }
         else {
-            return (DbExpression)vector.elementAt(0);
+            return (DbCondition)vector.elementAt(0);
         }
     }
 
-    private DbExpression parseTerm() throws DbException {
+    private DbCondition parseTerm() throws DbException {
         Vector vector = new Vector();
 
         vector.addElement(parseFactor());
 
-        while (tokenType == DbExpression.AND) {
+        while (tokenType == DbCondition.AND) {
             nextToken();
             vector.addElement(parseExpression());
         }
 
         if (vector.size() != 0) {
-            DbExpression[] array = new DbExpression[vector.size()];
+            DbCondition[] array = new DbCondition[vector.size()];
             for (int i = 0; i < vector.size(); i++) {
-                array[i] = (DbExpression)vector.elementAt(i);
+                array[i] = (DbCondition)vector.elementAt(i);
             }
 
-            return new DbExpression(DbExpression.AND, array);
+            return new DbCondition(DbCondition.AND, array);
         }
         else {
-            return (DbExpression)vector.elementAt(0);
+            return (DbCondition)vector.elementAt(0);
         }
     }
 
-    private DbExpression parseFactor() throws DbException {
+    private DbCondition parseFactor() throws DbException {
         if (tokenType == IDENT) {
             int field = table.findField(tokenText);
             if (field == -1) {
@@ -208,7 +208,7 @@ public class DbSqlParser {
 
             nextToken();
 
-            if ((tokenType < DbExpression.LT) || (tokenType > DbExpression.EQIC)) {
+            if ((tokenType < DbCondition.LT) || (tokenType > DbCondition.EQIC)) {
                 throw new DbException("Relational operator expected (" + tokenPos + ")");
             }
             int relop = tokenType;
@@ -271,13 +271,13 @@ public class DbSqlParser {
 
             nextToken();
 
-            return new DbExpression(relop, field, value);
+            return new DbCondition(relop, field, value);
         }
 
         else if (tokenType == LPAR) {
             nextToken();
 
-            DbExpression temp = parseExpression();
+            DbCondition temp = parseExpression();
 
             if (tokenType != RPAR) {
                 throw new DbException("Unclosed parenthesis (" + tokenPos + ")");
@@ -288,10 +288,10 @@ public class DbSqlParser {
             return temp;
         }
 
-        else if (tokenType == DbExpression.NOT) {
+        else if (tokenType == DbCondition.NOT) {
             nextToken();
 
-            return new DbExpression(DbExpression.NOT, new DbExpression[] {parseExpression()});
+            return new DbCondition(DbCondition.NOT, new DbCondition[] {parseExpression()});
         }
 
         else {

@@ -19,7 +19,7 @@ public class FieldStatistics {
     public static FieldStatistics [] generate (DbResultSet record) throws DbException{
 
 	DbTable table = record.getTable ();
-        FieldStatistics stat[] = new FieldStatistics [table.getFieldCount ()];
+        FieldStatistics stat[] = new FieldStatistics [table.getColumnCount ()];
 
         for (int i = 0; i < stat.length; i++) 
             stat [i] = new FieldStatistics ();

@@ -148,7 +148,7 @@ public class DbCondition {
             }
         }
         else {
-            type = table.getField(field).getType();
+            type = table.getColumn(field).getType();
         }
     }
 
@@ -163,27 +163,27 @@ public class DbCondition {
 
             switch (operator) {
                 case LT: {
-                    return DbField.compare(type, obj, value) < 0;
+                    return DbColumn.compare(type, obj, value) < 0;
                 }
 
                 case GT: {
-                    return DbField.compare(type, obj, value) > 0;
+                    return DbColumn.compare(type, obj, value) > 0;
                 }
 
                 case LE: {
-                    return DbField.compare(type, obj, value) <= 0;
+                    return DbColumn.compare(type, obj, value) <= 0;
                 }
 
                 case GE: {
-                    return DbField.compare(type, obj, value) >= 0;
+                    return DbColumn.compare(type, obj, value) >= 0;
                 }
 
                 case EQ: {
-                    return DbField.compare(type, obj, value) == 0;
+                    return DbColumn.compare(type, obj, value) == 0;
                 }
 
                 case NE: {
-                    return DbField.compare(type, obj, value) != 0;
+                    return DbColumn.compare(type, obj, value) != 0;
                 }
 
                 case EQ_TEXT: {
@@ -227,7 +227,7 @@ public class DbCondition {
     public String toString () {
 
         if (operator < AND) {
-            String f = table.getField (field).getName ();
+            String f = table.getColumn (field).getName ();
 
 			String v = value instanceof String ? "'"+value+"'" : ""+value;
 

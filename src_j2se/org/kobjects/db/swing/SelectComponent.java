@@ -160,8 +160,8 @@ public class SelectComponent extends JPanel {
 	public String getExpression () {
 	    return ""+fieldBox.getSelectedItem () 
 		+ " " + opBox.getSelectedItem () + " " 
-		+ (table.getField (fieldBox.getSelectedIndex()).getType () 
-		   == DbField.STRING 
+		+ (table.getColumn (fieldBox.getSelectedIndex()).getType () 
+		   == DbColumn.STRING 
 		   ? ("'" + valueField.getText() + "'") 
 		   : valueField.getText ());
 	}
@@ -182,9 +182,9 @@ public class SelectComponent extends JPanel {
 	super (new BorderLayout ());
 
 	this.table = table;
-	fieldNames = new String[table.getFieldCount ()]; 
+	fieldNames = new String[table.getColumnCount ()]; 
 	for (int i = 0; i < fieldNames.length; i++) 
-	    fieldNames [i] = table.getField (i).getName ();
+	    fieldNames [i] = table.getColumn (i).getName ();
 
 	if ((options & CONDITION) != 0) {
 	    conditionPane = new TreePane (new Node (null));

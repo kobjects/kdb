@@ -57,19 +57,19 @@ public class ArffParser {
                 int type;
                 
                 if (remainder.equalsIgnoreCase("real"))
-                	type = DbField.DOUBLE;
+                	type = DbColumn.DOUBLE;
                 else if (remainder.startsWith("{")) {
-                	type = DbField.STRING;
+                	type = DbColumn.STRING;
                 	values = org.kobjects.util.Csv.decode(remainder.substring(1, remainder.length()-1));
                 }
                 else {
                 	System.err.println ("unrecognized type: '"+remainder+"' assuming string");
-					type = DbField.STRING;
+					type = DbColumn.STRING;
                 }
                 
                 table.addField(name, type);
                 if (values != null) {
-					DbField field = table.getField(table.getFieldCount());
+					DbColumn field = table.getColumn(table.getColumnCount());
 					field.setProperties(null, 0, 0, values);
                 }
             }
@@ -87,15 +87,15 @@ public class ArffParser {
  		while (line.startsWith("%"));
  		
         String [] strings = Csv.decode(line);
- 		Object [] objects = new Object[table.getFieldCount()];
+ 		Object [] objects = new Object[table.getColumnCount()];
  		
- 		for (int i = 0; i < table.getFieldCount(); i++) {
- 			int type = table.getField(i+1).getType();
+ 		for (int i = 0; i < table.getColumnCount(); i++) {
+ 			int type = table.getColumn(i+1).getType();
  			switch(type) {
- 			case DbField.DOUBLE:
+ 			case DbColumn.DOUBLE:
  				objects[i] = new Double(strings[i]);
  				break;
- 			case DbField.STRING:
+ 			case DbColumn.STRING:
  				objects[i] = strings[i];
  				break;
  			default:

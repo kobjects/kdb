@@ -231,9 +231,9 @@ public class Ls8bibTable extends BibtexTable {
             ) {
             String name = (String) e.nextElement();
 
-            int i = findField(name);
+            int i = findColumn(name);
             if (i <= 0 && name.startsWith("opt")) {
-                i = findField(name.substring(3));
+                i = findColumn(name.substring(3));
             }
 
             if (i > 0) {

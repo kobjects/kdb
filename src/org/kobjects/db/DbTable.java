@@ -73,17 +73,17 @@ public interface DbTable {
      * Adds a field to the table. The table must be closed for this method
      * to succeed.
      */
-    public DbField addField(String name, int type) throws DbException;
+    public DbColumn addField(String name, int type) throws DbException;
 
     /**
      * Returns the total number of fields.
      */
-    public int getFieldCount();
+    public int getColumnCount();
 
     /**
      * Returns the field with the given index.
      */
-    public DbField getField(int i);
+    public DbColumn getColumn(int i);
 
     /**
      * Returns the index of the given field 
@@ -91,7 +91,7 @@ public interface DbTable {
      * Please note that field indices start with 1.
      */
     
-    public int findField(String name);
+    public int findColumn(String name);
 
     /**
      * Select all records. This is a convenience method. The usual rules for

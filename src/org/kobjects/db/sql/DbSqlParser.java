@@ -201,7 +201,7 @@ public class DbSqlParser {
 
     private DbCondition parseFactor() throws DbException {
         if (tokenType == IDENT) {
-            int field = table.findField(tokenText);
+            int field = table.findColumn(tokenText);
             if (field == -1) {
                 throw new DbException("Unknown field \"" + tokenText + "\"");
             }
@@ -220,8 +220,8 @@ public class DbSqlParser {
             }
 
             Object value = null;
-            switch (table.getField(field).getType()) {
-                case DbField.BOOLEAN: {
+            switch (table.getColumn(field).getType()) {
+                case DbColumn.BOOLEAN: {
                     if (tokenType != BOOLEAN) {
                         throw new DbException("Boolean value expected (" + tokenPos + ")");
                     }
@@ -230,8 +230,8 @@ public class DbSqlParser {
                     break;
                 }
 
-                case DbField.INTEGER:
-                case DbField.BITSET: {
+                case DbColumn.INTEGER:
+                case DbColumn.BITSET: {
                     if (tokenType != NUMBER) {
                         throw new DbException("Numeric value expected (" + tokenPos + ")");
                     }
@@ -240,7 +240,7 @@ public class DbSqlParser {
                     break;
                 }
 
-                case DbField.LONG: {
+                case DbColumn.LONG: {
                     if (tokenType != NUMBER) {
                         throw new DbException("Numeric value expected (" + tokenPos + ")");
                     }
@@ -249,7 +249,7 @@ public class DbSqlParser {
                     break;
                 }
 
-                case DbField.DATETIME: {
+                case DbColumn.DATETIME: {
                     long l = getDateTime(tokenText);
 
                     if ((l == -1) || (tokenType != NUMBER)) {
@@ -259,7 +259,7 @@ public class DbSqlParser {
                     break;
                 }
 
-                case DbField.STRING: {
+                case DbColumn.STRING: {
                     value = tokenText;
                     break;
                 }

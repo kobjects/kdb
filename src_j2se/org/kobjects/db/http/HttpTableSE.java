@@ -25,12 +25,12 @@ public class HttpTableSE implements DbTable {
         connect(connector);
     }
 
-    public DbField addField(String name, int type) {
-        int i = findField(name);
+    public DbColumn addField(String name, int type) {
+        int i = findColumn(name);
         if (i > 0)
-            return getField(i);
+            return getColumn(i);
 
-        DbField f = new DbField(this, fields.size()+1, name, type);
+        DbColumn f = new DbColumn(this, fields.size()+1, name, type);
         fields.addElement(f);
         return f;
     }
@@ -71,7 +71,7 @@ public class HttpTableSE implements DbTable {
                     System.out.println ("part "+i+": "+f[i]);
                 }
                 
-                addField(f[0], DbField.STRING);
+                addField(f[0], DbColumn.STRING);
                 // 1 type
                 // 2 len
                 // 3 dec
@@ -80,7 +80,7 @@ public class HttpTableSE implements DbTable {
                     if (idField != -1) 
                         System.err.println ("Only first ID field was accepted!");
                     else
-                        idField = getFieldCount();
+                        idField = getColumnCount();
                 }
             }
 
@@ -131,10 +131,10 @@ public class HttpTableSE implements DbTable {
         return idField;
     }
 
-    public int findField(String name) {
-        int cnt = getFieldCount();
+    public int findColumn(String name) {
+        int cnt = getColumnCount();
         for (int i = 1; i <= cnt; i++)
-            if (getField(i).getName().equals(name))
+            if (getColumn(i).getName().equals(name))
                 return i;
 
         return -1;
@@ -159,11 +159,11 @@ public class HttpTableSE implements DbTable {
         return buf.toString();
     }
 */
-    public DbField getField(int index) {
-        return (DbField) fields.elementAt(index-1);
+    public DbColumn getColumn(int index) {
+        return (DbColumn) fields.elementAt(index-1);
     }
 
-    public int getFieldCount() {
+    public int getColumnCount() {
         return fields.size();
     }
 
@@ -200,12 +200,12 @@ public class HttpTableSE implements DbTable {
 
             if (fields != null) {
                 buf.append("&fields=");
-                buf.append(getField (fields[0]).getName());
+                buf.append(getColumn (fields[0]).getName());
           //      boolean addId = idField != -1;
                 for (int i = 1; i < fields.length; i++) {
                     buf.append(",");
     //                if (fields [i] == idField) addId = false;
-                    buf.append(getField (fields[i]).getName());
+                    buf.append(getColumn (fields[i]).getName());
                 }
      //           if (addId) {
      //               buf.append(",");
@@ -268,8 +268,8 @@ public class HttpTableSE implements DbTable {
         HttpTableSE table =
             new HttpTableSE("http://localhost:1234/Westkunden");
 
-        for (int i = 0; i < table.getFieldCount(); i++) {
-            System.out.println(table.getField(i));
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            System.out.println(table.getColumn(i));
         }
     }
 

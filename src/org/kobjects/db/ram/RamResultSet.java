@@ -32,8 +32,8 @@ public class RamResultSet implements DbResultSet {
 		this.selection = selection;
 
 		if (selectedFields == null) {
-			selectedFields = new int[table.getFieldCount()];
-			for (int i = 1; i <= table.getFieldCount(); i++)
+			selectedFields = new int[table.getColumnCount()];
+			for (int i = 1; i <= table.getColumnCount(); i++)
 				selectedFields[i - 1] = i;
 		}
 
@@ -79,8 +79,8 @@ public class RamResultSet implements DbResultSet {
 		return (b == null) ? false : b.booleanValue();
 	}
 
-	public DbField getField(int index) {
-		return table.getField(selectedFields[index - 1]);
+	public DbColumn getField(int index) {
+		return table.getColumn(selectedFields[index - 1]);
 	}
 
 	public int getColumnCount() {
@@ -149,7 +149,7 @@ public class RamResultSet implements DbResultSet {
 
 		int cnt = table.getPhysicalFieldCount();
 		for (int i = 0; i < cnt; i++) {
-			values[i] = table.getField(i).getDefault();
+			values[i] = table.getColumn(i).getDefault();
 		}
 	}
 	/*

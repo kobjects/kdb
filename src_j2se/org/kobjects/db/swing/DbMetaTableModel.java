@@ -18,7 +18,7 @@ public class DbMetaTableModel extends AbstractTableModel {
 
     public int getRowCount () {
 	//	try {
-	return table.getFieldCount ();
+	return table.getColumnCount ();
 	//	}
 	//catch (DbException e) {
 	//    throw ChainedRuntimeException.create (e, null);
@@ -57,20 +57,20 @@ public class DbMetaTableModel extends AbstractTableModel {
 
     public Object getValueAt (int row, int column) {
 	//try {
-	    DbField f = table.getField (row+1);
+	    DbColumn f = table.getColumn (row+1);
 	    FieldStatistics fs = stats != null ? stats [row] : null;
 	    switch (column) {
 	    case 0: return ""+f.getNumber ();
 	    case 1: return f.getName ();
 	    case 2: 
 		switch (f.getType ()) {
-		case DbField.BOOLEAN: return "boolean";
-		case DbField.STRING: return "string";
-		case DbField.INTEGER: return "integer";
-		case DbField.LONG: return "long";
-		case DbField.BITSET: return "bitset";
-		case DbField.DATETIME: return "datetime";
-		case DbField.BINARY: return "binary";
+		case DbColumn.BOOLEAN: return "boolean";
+		case DbColumn.STRING: return "string";
+		case DbColumn.INTEGER: return "integer";
+		case DbColumn.LONG: return "long";
+		case DbColumn.BITSET: return "bitset";
+		case DbColumn.DATETIME: return "datetime";
+		case DbColumn.BINARY: return "binary";
 		default: return "unknown/"+f.getType ();
 		}
 	    case 3: return ""+f.getMaxSize ();

@@ -62,8 +62,8 @@ class JdbcRecord implements DbResultSet {
 		return rowCount;
 	}
 
-	public DbField getField(int column) {
-		return table.getField(fields[column - 1]);
+	public DbColumn getField(int column) {
+		return table.getColumn(fields[column - 1]);
 	}
 
 	/**
@@ -74,22 +74,22 @@ class JdbcRecord implements DbResultSet {
 		try {
 			int dbc = fields[column - 1];
 
-			switch (table.getField(column).getType()) {
+			switch (table.getColumn(column).getType()) {
 
-				case DbField.STRING :
+				case DbColumn.STRING :
 					return resultSet.getString(column);
-				case DbField.DOUBLE :
+				case DbColumn.DOUBLE :
 					return new Double(resultSet.getDouble(column));
-				case DbField.INTEGER :
+				case DbColumn.INTEGER :
 					return new Integer(resultSet.getInt(column));
-				case DbField.LONG :
+				case DbColumn.LONG :
 					return new Long(resultSet.getLong(column));
-				case DbField.DATETIME :
+				case DbColumn.DATETIME :
 					return resultSet.getDate(column);
 				default :
 					System.err.println(
 						"returning null for NYI type: "
-							+ table.getField(column).getType());
+							+ table.getColumn(column).getType());
 					return null;
 			}
 		}

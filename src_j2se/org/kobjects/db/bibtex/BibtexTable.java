@@ -152,8 +152,8 @@ public class BibtexTable extends RamTable {
                 + exists);
 
         for (int i = 0; i < DEFAULT_FIELDS.length; i++) {
-            if (findField(DEFAULT_FIELDS[i]) <= 0)
-                addField(DEFAULT_FIELDS[i], DbField.STRING);
+            if (findColumn(DEFAULT_FIELDS[i]) <= 0)
+                addField(DEFAULT_FIELDS[i], DbColumn.STRING);
         }
 
         if (exists) {
@@ -162,7 +162,7 @@ public class BibtexTable extends RamTable {
                     new BufferedReader(new FileReader(file));
                 BibtexParser parser = new BibtexParser(reader);
 
-                int fields = getFieldCount();
+                int fields = getColumnCount();
                 int lastInc = 0;
 
                 while (true) {
@@ -176,10 +176,10 @@ public class BibtexTable extends RamTable {
                         ) {
                         String name = (String) e.nextElement();
 
-                        int i = findField(name);
+                        int i = findColumn(name);
 
                         if (i <= 0) {
-                            addField(name, DbField.STRING)
+                            addField(name, DbColumn.STRING)
                                 .getNumber();
                             fields++;
                             Object[] tmp = new Object[fields];
@@ -219,7 +219,7 @@ public class BibtexTable extends RamTable {
             for (int i = 0; i < records.size(); i++) {
 
                 Object[] r = (Object[]) records.elementAt(i);
-                Object[] s = new Object[getFieldCount()];
+                Object[] s = new Object[getColumnCount()];
                 if (r.length == s.length)
                     break;
                 System.arraycopy(r, 0, s, 0, r.length);
@@ -227,13 +227,13 @@ public class BibtexTable extends RamTable {
             }
         }
 
-        physicalFields = getFieldCount();
-        addField("pdfFile", DbField.BINARY);
+        physicalFields = getColumnCount();
+        addField("pdfFile", DbColumn.BINARY);
     }
 
     public int getPhysicalFieldCount() {
         return physicalFields == -1
-            ? getFieldCount()
+            ? getColumnCount()
             : physicalFields;
     }
 
@@ -288,7 +288,7 @@ public class BibtexTable extends RamTable {
                 continue;
 
             bw.writeField(
-                getField(j + 1).getName(),
+                getColumn(j + 1).getName(),
                 entry[j].toString());
         }
 

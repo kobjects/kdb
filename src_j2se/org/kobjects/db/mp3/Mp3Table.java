@@ -27,14 +27,14 @@ public class Mp3Table extends RamTable {
         base = connector.substring(4);
         exists = true;
 
-        addField("id", DbField.STRING); // 0
-        addField("file", DbField.STRING); // 1 
-        addField("track", DbField.STRING); // 2
-        addField("artist", DbField.STRING); // 3
-        addField("album", DbField.STRING); // 4
-        addField("year", DbField.STRING); // 5
-        addField("comment", DbField.STRING); // 6 
-        addField("data", DbField.BINARY); // 7
+        addField("id", DbColumn.STRING); // 0
+        addField("file", DbColumn.STRING); // 1 
+        addField("track", DbColumn.STRING); // 2
+        addField("artist", DbColumn.STRING); // 3
+        addField("album", DbColumn.STRING); // 4
+        addField("year", DbColumn.STRING); // 5
+        addField("comment", DbColumn.STRING); // 6 
+        addField("data", DbColumn.BINARY); // 7
 
     }
 
@@ -55,7 +55,7 @@ public class Mp3Table extends RamTable {
     }
 
     void addFile(File file) throws DbException {
-        Object[] data = new Object[getFieldCount()];
+        Object[] data = new Object[getColumnCount()];
         data[0] = "" + (counter++);
         data[1] = file.toString();
         records.addElement(data);
@@ -106,7 +106,7 @@ public class Mp3Table extends RamTable {
         DbResultSet record = table.select(false);
 
         while (record.next()) {
-            for (int i = 0; i < table.getFieldCount() - 1; i++) {
+            for (int i = 0; i < table.getColumnCount() - 1; i++) {
                 System.out.println(record.getString(i));
             }
         }

@@ -45,7 +45,7 @@ class StatsNode extends AbstractRecordNode {
 
 		for (int i = 0; i < stats.length; i++) {
 		    if (stats [i].values != null) 
-			add (new ValuesNode (this, dbTable.getField (i).getName (), stats[i].values), false);
+			add (new ValuesNode (this, dbTable.getColumn (i).getName (), stats[i].values), false);
 		}
     }
 

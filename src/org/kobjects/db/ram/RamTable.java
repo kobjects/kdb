@@ -20,21 +20,21 @@ public class RamTable implements DbTable {
     public void connect(String connector) throws DbException {
     }
 
-    public int findField(String name) {
-        int cnt = getFieldCount();
+    public int findColumn(String name) {
+        int cnt = getColumnCount();
         for (int i = 1; i <= cnt; i++)
-            if (getField(i).getName().equals(name))
+            if (getColumn(i).getName().equals(name))
                 return i;
 
         return -1;
     }
 
-    public DbField addField(String name, int type) {
-        int i = findField(name);
+    public DbColumn addField(String name, int type) {
+        int i = findColumn(name);
         if (i > 0)
-            return getField(i);
+            return getColumn(i);
 
-        DbField f = new DbField(this, fields.size()+1, name, type);
+        DbColumn f = new DbColumn(this, fields.size()+1, name, type);
         fields.addElement(f);
         return f;
     }
@@ -85,17 +85,17 @@ public class RamTable implements DbTable {
         return -1;
     }
 
-    public DbField getField(int index) {
-        return (DbField) fields.elementAt(index-1);
+    public DbColumn getColumn(int index) {
+        return (DbColumn) fields.elementAt(index-1);
     }
 
-    public int getFieldCount() {
+    public int getColumnCount() {
         return fields.size();
     }
     
     
     public int getPhysicalFieldCount() {
-    	return getFieldCount();
+    	return getColumnCount();
     }
     
     /** 

@@ -33,7 +33,7 @@ public interface DbResultSet {
 
 	public int getColumnCount();
 	
-	public DbField getField(int column);
+	public DbColumn getField(int column);
 	
 	public int findColumn(String name);
 
@@ -46,7 +46,7 @@ public interface DbResultSet {
 	 * the field is null. Some storages may not make a distinction
 	 * between -2 and 0 */
 
-	public long getSize(int column);
+//	public long getSize(int column);
 
     public String getString(int column);
 

@@ -113,26 +113,26 @@ public class JdbcTable implements DbTable {
                     case Types.CHAR :
                     case Types.VARCHAR :
                     case Types.LONGVARCHAR :
-                        type = DbField.STRING;
+                        type = DbColumn.STRING;
                         break;
                     case Types.INTEGER :
-                        type = DbField.INTEGER;
+                        type = DbColumn.INTEGER;
                         break;
                     case Types.NUMERIC :
                         if (meta.getPrecision(i) <= 16
                             && meta.getScale(i) == 0)
                             type =
                                 meta.getPrecision(i) <= 8
-                                    ? DbField.INTEGER
-                                    : DbField.LONG;
+                                    ? DbColumn.INTEGER
+                                    : DbColumn.LONG;
                         else
-                            type = DbField.DOUBLE;
+                            type = DbColumn.DOUBLE;
                         break;
                     case Types.REAL :
-                        type = DbField.DOUBLE;
+                        type = DbColumn.DOUBLE;
                         break;
                     case Types.TIMESTAMP :
-                        type = DbField.DATETIME;
+                        type = DbColumn.DATETIME;
                         break;
                     default :
                         throw new RuntimeException(
@@ -151,21 +151,21 @@ public class JdbcTable implements DbTable {
         exists = true;
     }
 
-    public int findField(String name) {
-        int cnt = getFieldCount();
+    public int findColumn(String name) {
+        int cnt = getColumnCount();
         for (int i = 1; i <= cnt; i++)
-            if (getField(i).getName().equals(name))
+            if (getColumn(i).getName().equals(name))
                 return i;
 
         return -1;
     }
 
-    public DbField addField(String name, int type) {
-        int i = findField(name);
+    public DbColumn addField(String name, int type) {
+        int i = findColumn(name);
         if (i != -1)
-            return getField(i);
+            return getColumn(i);
 
-        DbField f = new DbField(this, fields.size()+1, name, type);
+        DbColumn f = new DbColumn(this, fields.size()+1, name, type);
         fields.addElement(f);
         return f;
     }
@@ -234,11 +234,11 @@ public class JdbcTable implements DbTable {
         return exists;
     }
 
-    public DbField getField(int index) {
-        return (DbField) fields.elementAt(index-1);
+    public DbColumn getColumn(int index) {
+        return (DbColumn) fields.elementAt(index-1);
     }
 
-    public int getFieldCount() {
+    public int getColumnCount() {
         return fields.size();
     }
 
@@ -259,17 +259,17 @@ public class JdbcTable implements DbTable {
         StringBuffer buf = new StringBuffer("select ");
         
         if (fields == null) {
-			fields = new int [getFieldCount()];
-			for (int i = 0; i < getFieldCount(); i++) {
+			fields = new int [getColumnCount()];
+			for (int i = 0; i < getColumnCount(); i++) {
 				fields[i] = i+1;	
 			}        	
         }
         
         
-            buf.append(getField(fields[0]).getName());
+            buf.append(getColumn(fields[0]).getName());
             for (int i = 1; i < fields.length; i++) {
                 buf.append(", ");
-                buf.append(getField(fields[i]).getName());
+                buf.append(getColumn(fields[i]).getName());
             }
 
         buf.append(" from ");
@@ -310,15 +310,15 @@ public class JdbcTable implements DbTable {
         StringBuffer buf = new StringBuffer("CREATE TABLE ");
         buf.append(tableName);
 
-        for (int i = 0; i < getFieldCount(); i++) {
-            DbField f = getField(i);
+        for (int i = 0; i < getColumnCount(); i++) {
+            DbColumn f = getColumn(i);
             buf.append(i == 0 ? " (" : ", ");
             buf.append(f.getName());
             buf.append(' ');
             switch (f.getType()) {
-                case DbField.DOUBLE :
-                case DbField.INTEGER :
-                case DbField.LONG :
+                case DbColumn.DOUBLE :
+                case DbColumn.INTEGER :
+                case DbColumn.LONG :
                     if (f.getConstraints() == 0)
                         buf.append(
                             "NUMBER (" + f.getMaxSize() + ")");
@@ -331,7 +331,7 @@ public class JdbcTable implements DbTable {
                                 + ")");
                     break;
 
-                case DbField.STRING :
+                case DbColumn.STRING :
                     buf.append(
                         "VARCHAR (" + f.getMaxSize() + ")");
                     break;

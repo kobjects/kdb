@@ -12,7 +12,7 @@ package org.kobjects.db;
 /**
  * Describes a field in a table.
  */
-public class DbField {
+public class DbColumn {
 
     /**
      * Is the type constant for boolean fields.
@@ -120,7 +120,7 @@ public class DbField {
      * created using the table's <code>addField()</code> factory
      * method.
      */
-    public DbField(DbTable table, int number, String name, int type) {
+    public DbColumn(DbTable table, int number, String name, int type) {
         this.table = table;
         this.number = number;
         this.name = name;
@@ -219,25 +219,25 @@ public class DbField {
      */
     public static int compare(int type, Object value1, Object value2) {
         switch (type) {
-            case DbField.INTEGER:
-            case DbField.BITSET: {
+            case DbColumn.INTEGER:
+            case DbColumn.BITSET: {
                 return ((Integer)value1).intValue() - ((Integer)value2).intValue();
             }
 
-            case DbField.LONG:
-            case DbField.DATETIME: {
+            case DbColumn.LONG:
+            case DbColumn.DATETIME: {
                 long l = ((Long)value1).longValue() - ((Long)value2).longValue();
 
                 if (l < 0) return -1; else if (l > 0) return 1; else return 0;
             }
 
-            case DbField.STRING:
-            case DbField.BOOLEAN: {
+            case DbColumn.STRING:
+            case DbColumn.BOOLEAN: {
                 return value1.toString().compareTo(value2.toString());
             }
 
-            case DbField.BINARY:
-            case DbField.GRAPHICS:
+            case DbColumn.BINARY:
+            case DbColumn.GRAPHICS:
                 return ((byte[])value1).length - ((byte[])value2).length;
 
             default: {

@@ -42,20 +42,20 @@ public class DbTableModel extends AbstractTableModel {
     public Class getColumnClass(int column) {
         switch (record.getField(column+1)
             .getType()) {
-            case DbField.STRING :
+            case DbColumn.STRING :
                 return String.class;
-            case DbField.INTEGER :
+            case DbColumn.INTEGER :
                 return Integer.class;
-            case DbField.LONG :
+            case DbColumn.LONG :
                 return Long.class;
-            case DbField.BOOLEAN :
+            case DbColumn.BOOLEAN :
                 return Boolean.class;
-            case DbField.GRAPHICS :
-            case DbField.BINARY :
+            case DbColumn.GRAPHICS :
+            case DbColumn.BINARY :
                 return byte[].class;
-            case DbField.BITSET :
+            case DbColumn.BITSET :
                 return Integer.class;
-            case DbField.DATETIME :
+            case DbColumn.DATETIME :
                 return Date.class;
             default :
                 return Object.class;

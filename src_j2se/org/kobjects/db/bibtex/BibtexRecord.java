@@ -28,7 +28,7 @@ public class BibtexRecord extends RamResultSet {
 
 
 	public Object getObject (int index)  {
-		DbField field = getField(index);
+		DbColumn field = getField(index);
 		if (field.getNumber() <= table.physicalFields) 
 			return super.getObject(index);
 

@@ -21,7 +21,7 @@ public class HttpResultSet implements DbResultSet {
 		this.table = table;
 
 		if (fields == null) {
-			fields = new int[table.getFieldCount()];
+			fields = new int[table.getColumnCount()];
 			for (int i = 0; i < fields.length; i++) {
 				fields[i] = i + 1;
 			}
@@ -61,8 +61,8 @@ public class HttpResultSet implements DbResultSet {
 		return (b == null) ? false : b.booleanValue();
 	}
 
-	public DbField getField(int column) {
-		return table.getField(fields[column - 1]);
+	public DbColumn getField(int column) {
+		return table.getColumn(fields[column - 1]);
 	}
 
 	public int getInt(int column) {
@@ -208,7 +208,7 @@ public class HttpResultSet implements DbResultSet {
 			for (int i = 0; i < content.length; i++) {
 				if ((content[i] != values[i])
 					&& (content[i] == null || !content[i].equals(values[i]))) {
-					w.write(table.getField(i).getName() + "=");
+					w.write(table.getColumn(i).getName() + "=");
 					if (values[i] != null)
 						w.write(Csv.encode(values[i].toString(), (char) 0));
 					w.write("\r\n");

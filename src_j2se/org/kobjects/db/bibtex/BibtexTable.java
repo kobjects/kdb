@@ -34,6 +34,19 @@ public class BibtexTable extends RamTable {
                 addField ((String) parser.fieldNames.elementAt (i), DbField.STRING);
             } 
             
+	    // ensure equal record sizes
+
+	    for (int i = 0; i < records.size (); i++) {
+		Object [] r = (Object []) records.elementAt (i);
+		if (r.length < getFieldCount ()) {
+		    Object [] n = new Object [getFieldCount ()];
+		    for (int j = 0; j < r.length; j++) 
+			n [j] = r [j];
+
+		    records.setElementAt (n, i);
+		}
+	    }
+
             open = true;
         }
         catch (IOException e) {
@@ -41,3 +54,6 @@ public class BibtexTable extends RamTable {
         }
     }
 } 
+
+
+

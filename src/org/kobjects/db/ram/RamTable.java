@@ -16,7 +16,7 @@ public class RamTable extends DbTable {
     protected boolean open;
     protected boolean exists;
 
-    protected int [] idFields;
+    //    protected int [] idFields;
 
 
     public void init (String connector) {
@@ -79,8 +79,24 @@ public class RamTable extends DbTable {
 
 
     public DbRecord select (DbCondition condition, int sortfield, boolean inverse, boolean updated) {
-        throw new RuntimeException ("NYI");
+
+	Vector selected = new Vector ();
+
+	for (int i = 0; i < records.size (); i++) {
+
+	    Object [] r = (Object []) records.elementAt (i);
+
+	    if (r != null && condition.evaluate (r)) 
+		selected.addElement (r);
+	}
+
+	if (sortfield != -1 || updated) 
+	    throw new RuntimeException ("NYI");
+
+	return new RamRecord (this, selected);
     }
 }
+
+
 
 

@@ -8,9 +8,16 @@ import org.kobjects.db.ram.*;
 
 import java.net.*;
 
+/** 
+ * A DbTable implementation for bibtex databases. Creates an
+ * id automatically. */
+
 public class BibtexTable extends RamTable implements Runnable {
 
     String filename;
+	static final String [] DEFAULT_FIELDS = 
+		{"author", "booktitle", "editor", "year", "month", "issue", 
+		 "type"};
 
     public BibtexTable() {
     }
@@ -87,6 +94,11 @@ public class BibtexTable extends RamTable implements Runnable {
                     addField("id", DbField.STRING);
                 }
 
+				for (int i = 0; i < DEFAULT_FIELDS.length; i++) {
+					if (findField (DEFAULT_FIELDS[i]) == -1)
+						addField (DEFAULT_FIELDS[i], DbField.STRING);
+				}
+
                 // ensure equal record sizes
 
                 for (int i = 0;
@@ -137,6 +149,12 @@ public class BibtexTable extends RamTable implements Runnable {
 
         }
     }
+
+	protected void update(int i, Object[] entry) throws DbException {
+		if (entry[idField] == null) 
+			entry[idField] = generateId();
+		super.update(i, entry);
+	}
 
     protected void writeEntry(BufferedWriter w, Object[] entry)
         throws IOException {

@@ -46,6 +46,10 @@ class RamRecord implements DbRecord {
             if (selectedFields[i] == column)
                 return values[column];
 
+        // provide always access to id field if available
+        if (column == table.idField)
+            return values[column];
+
         throw new IllegalArgumentException(
             "Field " + column + " not in selection!");
     }
@@ -115,6 +119,7 @@ class RamRecord implements DbRecord {
 
     public void insert() throws DbException {
         modified = true;
+        index = table.INSERT_ROW;
 
         int cnt = table.getFieldCount();
         for (int i = 0; i < cnt; i++) {
@@ -141,24 +146,35 @@ class RamRecord implements DbRecord {
     }
 
     public void refresh() {
+        index =
+            ((Integer) selection.elementAt(current)).intValue();
         Object[] content =
             (Object[]) table.records.elementAt(index);
+
+        deleted = content == null;
+
         for (int i = 0; i < content.length; i++)
-            values[i] = content[i];
+            values[i] = deleted ? null : content[i];
 
         modified = false;
     }
 
     public void update() throws DbException {
-        Object[] content = new Object[values.length];
-        for (int i = 0; i < values.length; i++)
-            content[i] = values[i];
 
-		table.update(index, content);  
+/*        Object[] content = null;
+
+        if (!deleted) {
+            content = new Object[values.length];
+            for (int i = 0; i < values.length; i++)
+                content[i] = values[i];
+        } */
+
+        table.update(index, deleted ? null : values);
+
     }
 
     public void delete() {
-        throw new RuntimeException("NYI");
+        deleted = true;
     }
 
     public int getRow() {

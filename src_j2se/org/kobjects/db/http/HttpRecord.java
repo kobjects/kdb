@@ -163,10 +163,12 @@ public class HttpRecord implements DbResultSet {
     }
 
 
-    public void absolute(int position) throws DbException {
+    public boolean absolute(int position) throws DbException {
         beforeFirst();
         for (int i = 0; i < position; i++)
-            next();
+            if (!next()) return false;
+            
+        return true;
     }
 
     public void refreshRow() {

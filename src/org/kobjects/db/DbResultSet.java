@@ -123,7 +123,7 @@ public interface DbResultSet {
     /**
      * Jumps to a given row. Please note: Row counting starts with 1
      */
-    public void absolute(int row) throws DbException;
+    public boolean absolute(int row) throws DbException;
 
     /**
      * Throws away the record and all resources it has reserved.

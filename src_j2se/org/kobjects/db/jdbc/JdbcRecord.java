@@ -360,9 +360,9 @@ class JdbcRecord implements DbResultSet {
     /**
      * @see DbRecord#absolute(int)
      */
-    public void absolute(int row) throws DbException {
+    public boolean absolute(int row) throws DbException {
         try {
-            resultSet.absolute(row);
+            return resultSet.absolute(row);
             //	refreshRow ();
         }
         catch (SQLException e) {

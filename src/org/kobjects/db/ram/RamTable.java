@@ -78,7 +78,7 @@ public class RamTable implements DbTable {
     }
 
     public boolean exists() {
-        return !open;
+        return exists;
     }
 
     public int getIdField() {

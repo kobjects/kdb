@@ -26,7 +26,7 @@ public class BibtexTable extends RamTable implements Runnable {
             "year",
             "month",
             "issue",
-            "type" };
+            "type"};
 
     public BibtexTable() {
     }
@@ -82,7 +82,12 @@ public class BibtexTable extends RamTable implements Runnable {
 
 
 		File file = new File(filename);
+		
+		
         exists = file.exists();
+        
+       System.out.println ("trying to (re)load bib file: "+file.getAbsoluteFile()+" existing:"+exists);
+        
         if (exists) {
             try {
             	lastModified = file.lastModified();

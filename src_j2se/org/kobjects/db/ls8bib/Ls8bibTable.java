@@ -80,8 +80,19 @@ public class Ls8bibTable extends BibtexTable {
 			} catch (InterruptedException e) {
 			};
 
-			if (update.size() == 0)
-				continue;
+			if (update.size() == 0) {
+
+				if (new File(filename).lastModified() > lastModified) {
+					try {
+						reload();
+					}
+					catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				
+				continue;				
+			}
 
 			Vector v = update;
 			update = new Vector();

@@ -14,10 +14,18 @@ import java.net.*;
 
 public class BibtexTable extends RamTable implements Runnable {
 
-    String filename;
-	static final String [] DEFAULT_FIELDS = 
-		{"author", "booktitle", "editor", "year", "month", "issue", 
-		 "type"};
+    protected String filename;
+    protected long lastModified;
+    
+    static final String[] DEFAULT_FIELDS =
+        {
+            "author",
+            "booktitle",
+            "editor",
+            "year",
+            "month",
+            "issue",
+            "type" };
 
     public BibtexTable() {
     }
@@ -66,38 +74,55 @@ public class BibtexTable extends RamTable implements Runnable {
         return buf.toString();
     }
 
-    public void connect(String connector) throws DbException {
-        filename =
-            connector.substring(connector.indexOf(':') + 1);
-        exists = new File(filename).exists();
+    protected synchronized void reload() throws DbException {
+
+        Vector rNew = new Vector();
+        Hashtable iNew = new Hashtable();
+
+
+		File file = new File(filename);
+        exists = file.exists();
         if (exists) {
             try {
+            	lastModified = file.lastModified();
+            	
                 BibtexParser parser =
                     new BibtexParser(
                         new BufferedReader(
-                            new FileReader(filename)));
+                            new FileReader(file)));
 
                 parser.parse();
 
-                for (int i = 0;
-                    i < parser.fieldNames.size();
-                    i++) {
-                    String name =
-                        (String) parser.fieldNames.elementAt(i);
-                    if ("id".equals(name))
-                        setIdField (i);
-                    addField(name, DbField.STRING);
-                }
+                if (getFieldCount() == 0) {
 
-                if (idField == -1) {
-                    setIdField (getFieldCount());
-                    addField("id", DbField.STRING);
-                }
+                    for (int i = 0;
+                        i < parser.fieldNames.size();
+                        i++) {
+                        String name =
+                            (
+                                String) parser
+                                    .fieldNames
+                                    .elementAt(
+                                i);
+                        if ("id".equals(name))
+                            setIdField(i);
+                        addField(name, DbField.STRING);
+                    }
 
-				for (int i = 0; i < DEFAULT_FIELDS.length; i++) {
-					if (findField (DEFAULT_FIELDS[i]) == -1)
-						addField (DEFAULT_FIELDS[i], DbField.STRING);
-				}
+                    if (idField == -1) {
+                        setIdField(getFieldCount());
+                        addField("id", DbField.STRING);
+                    }
+
+                    for (int i = 0;
+                        i < DEFAULT_FIELDS.length;
+                        i++) {
+                        if (findField(DEFAULT_FIELDS[i]) == -1)
+                            addField(
+                                DEFAULT_FIELDS[i],
+                                DbField.STRING);
+                    }
+                }
 
                 // ensure equal record sizes
 
@@ -120,28 +145,40 @@ public class BibtexTable extends RamTable implements Runnable {
                         r[idField] = generateId();
                     }
 
-                    records.addElement(r);
+                    rNew.addElement(r);
 
-                    index.put(r[idField], new Integer(i));
+                    iNew.put(r[idField], new Integer(i));
                 }
+
+                records = rNew;
+                index = iNew;
+
             }
             catch (IOException e) {
                 throw new DbException(e.toString());
             }
         }
+
     }
 
-	public void open() throws DbException{
-		super.open();
-		new Thread (this).start();
-	}
+    public void connect(String connector) throws DbException {
+        filename =
+            connector.substring(connector.indexOf(':') + 1);
+        reload ();
+
+    }
+
+    public void open() throws DbException {
+        super.open();
+        new Thread(this).start();
+    }
 
     public void run() {
         while (open) {
             try {
                 Thread.sleep(15000);
-	            if (modified)
-    	            rewrite();
+                if (modified)
+                    rewrite();
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -150,11 +187,12 @@ public class BibtexTable extends RamTable implements Runnable {
         }
     }
 
-	protected void update(int i, Object[] entry) throws DbException {
-		if (entry[idField] == null) 
-			entry[idField] = generateId();
-		super.update(i, entry);
-	}
+    protected void update(int i, Object[] entry)
+        throws DbException {
+        if (entry[idField] == null)
+            entry[idField] = generateId();
+        super.update(i, entry);
+    }
 
     protected void writeEntry(BufferedWriter w, Object[] entry)
         throws IOException {
@@ -209,29 +247,28 @@ public class BibtexTable extends RamTable implements Runnable {
         }
         System.out.println("BibtexTable: rewrite() finished");
     }
-    
 
     public void close() throws DbException {
         if (modified) {
-			rewrite();	
+            rewrite();
         }
         super.close();
     }
 
-        /*
-        	public static void main(String argv[]) throws DbException {
-        
-        		DbTable table = DbManager.connect("bibtex:" + argv[0]);
-        
-        		table.open();
-        
-        		DbRecord r = table.select(false);
-        
-        		while (r.hasNext()) {
-        			r.next();
-        
-        			System.out.println(r.getId());
-        		}
-        	}
-        */
+    /*
+    	public static void main(String argv[]) throws DbException {
+    
+    		DbTable table = DbManager.connect("bibtex:" + argv[0]);
+    
+    		table.open();
+    
+    		DbRecord r = table.select(false);
+    
+    		while (r.hasNext()) {
+    			r.next();
+    
+    			System.out.println(r.getId());
+    		}
+    	}
+    */
 }

@@ -111,13 +111,20 @@ public class JdbcTable implements DbTable {
                 // meta.getColumnName (i),
                 int type;
                 switch (meta.getColumnType(i)) {
+                	case Types.CHAR:
                     case Types.VARCHAR :
+                    case Types.LONGVARCHAR :
                         type = DbField.STRING;
                         break;
                     case Types.INTEGER :
                         type = DbField.INTEGER;
                         break;
                     case Types.NUMERIC :
+						if (meta.getPrecision(i) <= 16 && meta.getScale (i) == 0) 
+							type = meta.getPrecision(i) <= 8 ? DbField.INTEGER :DbField.LONG;
+						else
+							type = DbField.DOUBLE;
+						break;						                    	
                     case Types.REAL :
                         type = DbField.DOUBLE;
                         break;
@@ -174,8 +181,12 @@ public class JdbcTable implements DbTable {
     }
 
     public String getName() {
-        return "RamTable";
+        return tableName;
     }
+
+	public String toString () {
+		return tableName;	
+	}
 
     public void open() throws DbException {
         if (!exists)

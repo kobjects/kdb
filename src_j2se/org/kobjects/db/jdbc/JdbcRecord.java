@@ -6,7 +6,7 @@ import java.sql.*;
 
 class JdbcRecord implements DbRecord {
 
-	JdbcTable table;
+	JdbcTable table; 
 	ResultSet resultSet;
 	int [] fields;
 	int [] fieldMap;
@@ -127,7 +127,14 @@ class JdbcRecord implements DbRecord {
 		switch (table.getField (column).getType ()) {
 			
 			case DbField.STRING: return resultSet.getString (dbc);
-			default: return getObject (dbc);
+			case DbField.DOUBLE: return new Double (resultSet.getDouble(dbc));
+			case DbField.INTEGER: return new Integer (resultSet.getInt (dbc));
+			case DbField.LONG: return new Long (resultSet.getLong(dbc)); 
+			case DbField.DATETIME: return resultSet.getDate(dbc);
+			default: 
+				System.err.println ("returning null for NYI type: "
+					+table.getField (column).getType ());
+				return null;
 		}
 			
 	}

@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import org.kobjects.db.bibtex.BibtexTable;
-import org.kobjects.bibtex.BibtexParser;
+import org.kobjects.bibtex.*;
 import org.kobjects.db.*;
 
 /**
@@ -29,14 +29,19 @@ public class Ls8bibTable extends BibtexTable {
                         Reader reader =
                             new InputStreamReader(
                                 socket.getInputStream());
-                        PrintStream writer =
-                            new PrintStream(
+                        Writer writer =
+                            new OutputStreamWriter(
                                 socket.getOutputStream());
 
-                        if (!socket.getInetAddress().getHostAddress()
+                        writer.write("Start!\r\n");
+                        writer.flush();
+
+                        if (!socket
+                            .getInetAddress()
+                            .getHostAddress()
                             .startsWith("129.217.30."))
-                            writer.println(
-                                "connection refused outside ls8 net");
+                            writer.write(
+                                "connection refused outside ls8 net\r\n");
                         else {
 
                             BibtexParser bp =
@@ -48,16 +53,33 @@ public class Ls8bibTable extends BibtexTable {
                                         bp.nextEntry();
                                     if (entry == null)
                                         break;
+
                                     update(entry, writer);
+                                }
+
+                                if (modified) {
+                                    writer.write(
+                                        "The Bibtex file will be rewritten in up to 15 seconds\r\n");
+                                    writer.write(
+                                        "PLEASE VERIFY THE LITERATURE FILE THEN!\r\n");
+                                    writer.flush();
                                 }
                             }
                             catch (Exception e) {
-                                e.printStackTrace(writer);
+                                e.printStackTrace(
+                                    new PrintWriter(writer));
                             }
                         }
-                        reader.close();
-                        writer.close();
-                        socket.close();
+
+                        try {
+                            writer.close();
+                            reader.close();
+                            socket.close();
+                        }
+                        catch (IOException e) {
+                            // ignore closing problems	
+                        }
+
                     }
                     catch (Exception e) {
                         e.printStackTrace();
@@ -80,7 +102,7 @@ public class Ls8bibTable extends BibtexTable {
         throws DbException {
 
         if (entry != null) {
-            String key = (String) entry[KEY_INDEX];
+            String key = (String) entry[BIBKEY_INDEX];
 
             if (key != null && key.length() > 0) {
                 char c = key.charAt(key.length() - 1);
@@ -98,7 +120,7 @@ public class Ls8bibTable extends BibtexTable {
                         if (r == null)
                             continue;
 
-                        String k2 = (String) r[KEY_INDEX];
+                        String k2 = (String) r[BIBKEY_INDEX];
 
                         if (k2 == null)
                             continue;
@@ -117,7 +139,7 @@ public class Ls8bibTable extends BibtexTable {
                                 c = (char) (((int) c2) + 1);
                         }
                     }
-                    entry[KEY_INDEX] = key + c;
+                    entry[BIBKEY_INDEX] = key + c;
                 }
             }
         }
@@ -127,50 +149,78 @@ public class Ls8bibTable extends BibtexTable {
 
     /** add or update an entry received via the socket connection */
 
-    void update(Hashtable entry, PrintStream out)
-        throws DbException {
+    void update(Hashtable entry, Writer out)
+        throws IOException, DbException {
 
         // first, determine the recordIndex. set 
         // recordIndex to -1 for new records
 
         int recordIndex = INSERT_ROW;
 
-        String key = (String) entry.get("key");
+        String key = (String) entry.get("bibkey");
         String id = (String) entry.get("id");
 
-		if (key == null) {
-			out.println ("entry without key not accepted!");
-			return;
-		}
-		
+        if (key == null) {
+            out.write("entry without key not accepted!\r\n");
+            out.flush();
+            return;
+        }
 
         Integer box = null;
         boolean delete = false;
 
-        if (key != null) {
-            if (key.startsWith("*")) {
-                key = key.substring(1);
-                out.println("deleting entry: " + key);
-                update(
-                    ((Integer) idTable.get(key)).intValue(),
-                    null);
-                return;
+        if (key.startsWith("*")) {
+            key = key.substring(1);
+
+            box = (Integer) keyTable.get(key);
+
+            if (box == null)
+                out.write(
+                    "Deleting entry: "
+                        + key
+                        + " failed; key not found!\r\n\r\n");
+            else {
+                out.write("Deleting entry:\r\n\r\n");
+                recordIndex = box.intValue();
+
+                writeEntry(
+                    new BibtexWriter(out),
+                    (Object[]) records.get(recordIndex));
+
+                out.flush();
+
+                update(recordIndex, null);
             }
-            box = (Integer) idTable.get(key);
+            return;
         }
 
-        if (box == null && id != null)
-            box = (Integer) idTable.get(id);
+        box = (Integer) keyTable.get(key);
 
         if (box != null) {
             recordIndex = box.intValue();
-            out.print("replacing entry;");
-        }
-        else {
-            out.print("adding new entry;");
+
+            Object[] oldEntry =
+                (Object[]) records.get(recordIndex);
+
+            out.write("Replacing old entry:\r\n\r\n");
+
+            writeEntry(new BibtexWriter(out), oldEntry);
+
+            out.flush();
+
+            if (id == null || id.equals(""))
+                id = (String) oldEntry[ID_INDEX];
+            else if (!id.equals(oldEntry[ID_INDEX])) {
+                out.write(
+                    "ERROR: keys match, but ids do not match!\r\n");
+                out.flush();
+
+                return;
+            }
         }
 
-        out.println(" id: " + id + " key: " + key);
+		out.write("New entry:\r\n");
+        out.flush();
 
         // ok, now fill the record from the entry
 
@@ -180,24 +230,34 @@ public class Ls8bibTable extends BibtexTable {
             e.hasMoreElements();
             ) {
             String name = (String) e.nextElement();
+
             int i = findField(name);
+            if (i <= 0 && name.startsWith("opt")) {
+                i = findField(name.substring(3));
+            }
+
             if (i > 0) {
                 String value = (String) entry.get(name);
-                record[i-1] = value;
-                out.println("- " + name + ": " + value);
+                record[i - 1] = value;
             }
             else {
-                out.println("- ignoring unknown field: " + name);
+                out.write(
+                    "(ignoring unknown field: "
+                        + name
+                        + ")\r\n");
+                out.flush();
             }
         }
 
+        if (id != null && !id.equals(""))
+            record[ID_INDEX] = id;
+
         update(recordIndex, record);
 
-        out.println(
-            "record (new key: "
-                + record[KEY_INDEX]
-                + ") updated; bibtex file will be rewritten in up to 15 seconds");
-        out.println();
+        out.write("\r\n");
+        writeEntry(new BibtexWriter(out), record);
+
+        out.flush();
     }
 
 }

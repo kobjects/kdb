@@ -36,7 +36,7 @@ public class BibtexRecord extends RamResultSet {
 			
 			File file = new File 
 				(table.documentDir, 
-				 values[BibtexTable.KEY_INDEX]
+				 values[BibtexTable.BIBKEY_INDEX]
 				 +"."
 				 +field.getName().substring (0, 3));
 			

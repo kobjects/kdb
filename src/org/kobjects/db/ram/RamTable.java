@@ -101,18 +101,19 @@ public class RamTable implements DbTable {
     /** 
      * Overwrites the fields of the existing object with contents of the given entry */
     
-    protected void update(int row, Object[] entry) throws DbException {
+    protected void update(int recordIndex, Object[] entry) throws DbException {
     	
     	if (entry == null) {
-    		records.setElementAt (null, row-1);
+    		records.setElementAt (null, recordIndex);
+    		modified = true;
     		return;
     	}
     	
-    	Object[] rec = row == INSERT_ROW ? new Object[entry.length] : ((Object []) records.elementAt(row));
+    	Object[] rec = recordIndex == INSERT_ROW ? new Object[entry.length] : ((Object []) records.elementAt(recordIndex));
 
 		System.arraycopy (entry, 0, rec, 0, entry.length);
     	
-    	if (row == INSERT_ROW) {
+    	if (recordIndex == INSERT_ROW) {
 /*    		if (idField > 0) 
 	    		index.put (entry[idField], new Integer(records.size()));
 */	    		

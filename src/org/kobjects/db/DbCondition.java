@@ -229,7 +229,7 @@ public class DbCondition {
         if (operator < AND) {
             String f = table.getField (field).getName ();
 
-			String v = value instanceof String ? "\""+value+"\"" : ""+value;
+			String v = value instanceof String ? "'"+value+"'" : ""+value;
 
             switch (operator) {
                 case LT: return f + " < " + v;

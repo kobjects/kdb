@@ -230,7 +230,6 @@ public class JdbcTable implements DbTable {
         }
     }
 
-  
     public boolean exists() {
         return exists;
     }
@@ -243,7 +242,6 @@ public class JdbcTable implements DbTable {
         return fields.size();
     }
 
-   
     public DbRecord select(boolean updated) throws DbException {
         return select(null, null, -1, false, updated);
     }
@@ -259,23 +257,24 @@ public class JdbcTable implements DbTable {
         checkOpen(true);
 
         StringBuffer buf = new StringBuffer("select ");
-        buf.append("* ");
-        buf.append("from ");
+        if (fields == null)
+            buf.append('*');
+        else {
+            buf.append(getField(fields[0]).getName());
+            for (int i = 1; i < fields.length; i++) {
+                buf.append(", ");
+                buf.append(getField(fields[i]).getName());
+            }
+        }
+        buf.append(" from ");
         buf.append(tableName);
         if (condition != null)
             buf.append(" where " + condition);
 
-		System.out.println ("query: "+buf.toString());
+        System.out.println("query: " + buf.toString());
 
         try {
-            return new JdbcRecord(
-                this,
-                fields,
-                connection
-                    .createStatement(
-                        ResultSet.TYPE_SCROLL_SENSITIVE,
-                        ResultSet.CONCUR_UPDATABLE)
-                    .executeQuery(buf.toString()));
+            return new JdbcRecord(this, fields, buf.toString());
         }
         catch (SQLException e) {
             throw new DbException("" + e);

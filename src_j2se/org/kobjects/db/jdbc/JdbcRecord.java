@@ -7,8 +7,15 @@ import java.sql.*;
 class JdbcRecord implements DbRecord {
 
 	JdbcTable table; 
+	Statement statement;
 	ResultSet resultSet;
+	
+	/** list of selected db field indices */
+	
 	int [] fields;
+
+	/** map from db field indices to Jdbc result set field indices */
+
 	int [] fieldMap;
 	Object [] current;
 	boolean empty;
@@ -18,10 +25,16 @@ class JdbcRecord implements DbRecord {
     /**
      * Constructor for JdbcRecord.
      */
-    public JdbcRecord(JdbcTable table, int [] fields, ResultSet resultSet) throws SQLException {
+    public JdbcRecord(JdbcTable table, int [] fields, String query) throws SQLException {
 		this.table = table;
 		this.fields = fields;
-		this.resultSet = resultSet;
+
+		statement = table.connection
+                    .createStatement(
+                        ResultSet.TYPE_SCROLL_SENSITIVE,
+                        ResultSet.CONCUR_UPDATABLE);
+                        
+	    resultSet = statement.executeQuery(query);
 
 		empty = !resultSet.isBeforeFirst ();
 		current = new Object [table.getFieldCount ()];
@@ -126,6 +139,10 @@ class JdbcRecord implements DbRecord {
 
 	Object getObj (int column) throws SQLException {
 		int dbc = fieldMap [column];
+		if (dbc == 0) {
+			//System.out.println ("fieldMap ["+column+"] = null!!!");
+			return null;
+		}
 		switch (table.getField (column).getType ()) {
 			
 			case DbField.STRING: return resultSet.getString (dbc);
@@ -137,8 +154,7 @@ class JdbcRecord implements DbRecord {
 				System.err.println ("returning null for NYI type: "
 					+table.getField (column).getType ());
 				return null;
-		}
-			
+		}			
 	}
 
 
@@ -147,8 +163,10 @@ class JdbcRecord implements DbRecord {
      */
     public void refresh() throws DbException {
 		try {
-			for (int i = 0; i < table.getFieldCount (); i++) 
+			for (int i = 0; i < fieldMap.length; i++) {
 				current [i] = getObj (i);
+				//System.out.println ("current ["+i+"]="+current [i]);
+			}
 		}
 		catch (SQLException e) {
 			throw new DbException (""+e);
@@ -305,6 +323,9 @@ class JdbcRecord implements DbRecord {
     public void dispose() {
     	try {
 			resultSet.close();
+			statement.close ();
+			resultSet = null;
+			statement = null;
     	}
     	catch (SQLException e) {
     		throw new RuntimeException (""+e);

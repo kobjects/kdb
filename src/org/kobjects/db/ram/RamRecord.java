@@ -256,8 +256,8 @@ public class RamRecord implements DbResultSet {
 
 	public boolean next() throws DbException {
 		if (isAfterLast()) return false;
-		current++;
-		if (isLast()) return false;
+		current++; // if on last, just go to afterlast
+		if (isAfterLast()) return false;
 		index = ((Integer) selection.elementAt(current)).intValue();
 		refreshRow();
 		return true;

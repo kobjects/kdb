@@ -65,9 +65,15 @@ public class HttpRecord implements DbRecord {
         return (o == null) ? null : o.toString();
     }
 
+	
+
     public InputStream getBinary(int column) {
         return (InputStream) getBinary (column);
     }
+
+	public long getSize(int column) {
+		return -1;
+	}
 
     public int[] getSelectedFields() {
         return fields;

@@ -88,6 +88,12 @@ class JdbcRecord implements DbRecord {
 		return ((Long) getObject (column)).longValue();
     }
 
+
+	public long getSize(int column) {
+		return -1;
+	}
+
+
     /**
      * @see DbRecord#getString(int)
      */

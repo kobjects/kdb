@@ -47,6 +47,13 @@ public interface DbRecord {
 
     public long getLong(int column);
 
+	/** 
+	 * Returns the size of an binary field. -1 means unknown, -2 means
+	 * the field is null. Some storages may not make a distinction
+	 * between -2 and 0 */
+
+	public long getSize(int column);
+
     public String getString(int column);
 
     public InputStream getBinary(int column);

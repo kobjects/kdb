@@ -43,28 +43,47 @@ public class RamRecord implements DbRecord {
 		}
 	}
 
-	public Object getObject(int column) {
+
+	protected Object getObjectImpl(int column) {
 		if (selectedFields == null)
 			return values[column];
 
 		for (int i = 0; i < selectedFields.length; i++)
 			if (selectedFields[i] == column)
-				return (values[i] instanceof byte[])
-					? new ByteArrayInputStream((byte[]) values[column])
-					: values[column];
-
-		// provide always access to id field if available
+				return values[column];
+				
 		if (column == table.idField)
 			return values[column];
 
 		throw new IllegalArgumentException(
-			"Field " + column + " not in selection!");
+			"Field " + column + " not in selection!");				
+	}
+
+	public Object getObject(int column) {
+
+		Object value = getObjectImpl(column);
+		
+		return (value instanceof byte[])
+			? new ByteArrayInputStream((byte[]) values[column])
+			: values[column];
+
+		// provide always access to id field if available
 	}
 
 	public boolean getBoolean(int column) {
 		Boolean b = (Boolean) getObject(column);
 		return (b == null) ? false : b.booleanValue();
 	}
+
+	public long getSize(int column) {
+		Object value = getObjectImpl(column);
+
+		if (value == null) return -2;
+		return (value instanceof byte[]) 
+			? ((byte[]) value).length					
+			: -1;
+	}
+	
 
 	public int getInteger(int column) {
 		Integer i = (Integer) getObject(column);

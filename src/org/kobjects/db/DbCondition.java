@@ -230,14 +230,16 @@ public class DbCondition {
         if (operator < AND) {
             String f = field == -1 ? "#id" : table.getField (field).getName ();
 
+			String v = value instanceof String ? "\""+value+"\"" : ""+value;
+
             switch (operator) {
-                case LT: return f + " < " + value;
-                case GT: return f + " > " + value;
-                case LE: return f + " <= " + value;
-                case GE: return f + " >= " + value;
-                case EQ: return f + " == " + value;
-                case NE: return f + " != " + value;
-                case EQ_TEXT: return f + " = " + value;
+                case LT: return f + " < " + v;
+                case GT: return f + " > " + v;
+                case LE: return f + " <= " + v;
+                case GE: return f + " >= " + v;
+                case EQ: return f + " == " + v;
+                case NE: return f + " != " + v;
+                case EQ_TEXT: return f + " = " + v;
 			    default: throw new RuntimeException ("illegal operator: "+operator);
             }
         }

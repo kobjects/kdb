@@ -27,10 +27,10 @@ public class HttpTableSE implements DbTable {
 
     public DbField addField(String name, int type) {
         int i = findField(name);
-        if (i != -1)
+        if (i > 0)
             return getField(i);
 
-        DbField f = new DbField(this, fields.size(), name, type);
+        DbField f = new DbField(this, fields.size()+1, name, type);
         fields.addElement(f);
         return f;
     }
@@ -80,7 +80,7 @@ public class HttpTableSE implements DbTable {
                     if (idField != -1) 
                         System.err.println ("Only first ID field was accepted!");
                     else
-                        idField = getFieldCount()-1;
+                        idField = getFieldCount();
                 }
             }
 
@@ -133,7 +133,7 @@ public class HttpTableSE implements DbTable {
 
     public int findField(String name) {
         int cnt = getFieldCount();
-        for (int i = 0; i < cnt; i++)
+        for (int i = 1; i <= cnt; i++)
             if (getField(i).getName().equals(name))
                 return i;
 
@@ -160,7 +160,7 @@ public class HttpTableSE implements DbTable {
     }
 */
     public DbField getField(int index) {
-        return (DbField) fields.elementAt(index);
+        return (DbField) fields.elementAt(index-1);
     }
 
     public int getFieldCount() {
@@ -201,16 +201,16 @@ public class HttpTableSE implements DbTable {
             if (fields != null) {
                 buf.append("&fields=");
                 buf.append(getField (fields[0]).getName());
-                boolean addId = idField != -1;
+          //      boolean addId = idField != -1;
                 for (int i = 1; i < fields.length; i++) {
                     buf.append(",");
-                    if (fields [i] == idField) addId = false;
+    //                if (fields [i] == idField) addId = false;
                     buf.append(getField (fields[i]).getName());
                 }
-                if (addId) {
-                    buf.append(",");
-                    buf.append(getField (idField).getName());
-                }
+     //           if (addId) {
+     //               buf.append(",");
+     //               buf.append(getField (idField).getName());
+      //          }
             }
             if (condition != null) {
                 buf.append("&where=");

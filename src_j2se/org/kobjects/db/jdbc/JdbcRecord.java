@@ -5,7 +5,7 @@ import java.sql.*;
 import org.kobjects.db.*;
 import org.kobjects.util.*;
 
-class JdbcRecord implements DbRecord {
+class JdbcRecord implements DbResultSet {
 
 	JdbcTable table; 
 	Statement statement;

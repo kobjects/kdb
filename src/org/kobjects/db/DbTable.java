@@ -96,7 +96,7 @@ public interface DbTable {
      * Select all records. This is a convenience method. The usual rules for
      * the "big" select() apply.
      */
-    public DbRecord select(boolean updated) throws DbException;
+    public DbResultSet select(boolean updated) throws DbException;
 
  
     /**
@@ -109,7 +109,7 @@ public interface DbTable {
      * the whole result set is kept updated or not. The returned
      * result set is positioned before the first record.  */
 
-    public DbRecord select(int [] fields, DbCondition filter, 
+    public DbResultSet select(int [] fields, DbCondition filter, 
 			   int oderBy, boolean reverse, 
 			   boolean updated) throws DbException;
 }

@@ -35,7 +35,7 @@ import java.util.*;
  * the original table. Also, there are separate next and hasNext
  * methods.  */
 
-public interface DbRecord {
+public interface DbResultSet {
 
     public Object getObject(int column);
 
@@ -48,11 +48,6 @@ public interface DbRecord {
     public long getLong(int column);
 
 	/** 
-	 * This method is not part of the Jdbc ResultSet, but
-	 * it is required here because blobs are not provided here.
-	 * 
-	 * Perhaps it should be renamed to length for consistency?
-	 * 
 	 * Returns the size of an binary field. -1 means unknown, -2 means
 	 * the field is null. Some storages may not make a distinction
 	 * between -2 and 0 */

@@ -167,7 +167,7 @@ public class HttpTableSE implements DbTable {
         return fields.size();
     }
 
-    public DbRecord select(boolean update) throws DbException {
+    public DbResultSet select(boolean update) throws DbException {
         return select(null, null, -1, false, update);
     }
 
@@ -185,7 +185,7 @@ public class HttpTableSE implements DbTable {
         return buf.toString();
     }
 
-    public DbRecord select(
+    public DbResultSet select(
         int[] fields,
         DbCondition condition,
         int sortfield,

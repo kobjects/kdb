@@ -103,7 +103,7 @@ public class Mp3Table extends RamTable {
 
         DbTable table = DbManager.connect("mp3:/Users/haustein/Music");
         table.open();
-        DbRecord record = table.select(false);
+        DbResultSet record = table.select(false);
 
         while (record.hasNext()) {
             record.next();

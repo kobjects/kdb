@@ -7,10 +7,10 @@ import org.kobjects.util.*;
 
 public class DbTableModel extends AbstractTableModel {
 
-    DbRecord record;
+    DbResultSet record;
     int [] indices;
 
-    public DbTableModel (DbRecord record) {
+    public DbTableModel (DbResultSet record) {
 	this.record = record;
 	if (record.getSelectedFields () != null)
 	    indices = record.getSelectedFields ();

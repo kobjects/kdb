@@ -16,7 +16,7 @@ public class FieldStatistics {
     public int decimals;
     
 
-    public static FieldStatistics [] generate (DbRecord record) throws DbException{
+    public static FieldStatistics [] generate (DbResultSet record) throws DbException{
 
 	DbTable table = record.getTable ();
         FieldStatistics stat[] = new FieldStatistics [table.getFieldCount ()];

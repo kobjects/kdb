@@ -6,7 +6,7 @@ import java.net.*;
 import org.kobjects.db.*;
 import org.kobjects.util.*;
 
-public class HttpRecord implements DbRecord {
+public class HttpRecord implements DbResultSet {
 
     Vector selection;
     int current = -1;

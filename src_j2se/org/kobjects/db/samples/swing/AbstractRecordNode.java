@@ -16,7 +16,7 @@ abstract class AbstractRecordNode extends AbstractNode {
 
     DbTable dbTable;
     String query;
-    DbRecord record;
+    DbResultSet record;
     int [] fields;
     int order;
     boolean inverse;

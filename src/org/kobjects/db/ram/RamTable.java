@@ -118,11 +118,11 @@ public class RamTable implements DbTable {
         modified = true;    		
     }
 
-    public DbRecord select(boolean updated) throws DbException {
+    public DbResultSet select(boolean updated) throws DbException {
         return select(null, null, -1, false, updated);
     }
 
-    public DbRecord select(
+    public DbResultSet select(
         int[] fields,
         DbCondition condition,
         int sortfield,

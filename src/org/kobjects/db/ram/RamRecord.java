@@ -4,7 +4,7 @@ import java.util.*;
 import java.io.*;
 import org.kobjects.db.*;
 
-public class RamRecord implements DbRecord {
+public class RamRecord implements DbResultSet {
 
 	protected Vector selection;
 	/** index in selected */

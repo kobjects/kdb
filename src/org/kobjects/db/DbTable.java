@@ -88,8 +88,11 @@ public interface DbTable {
     public DbField getField(int i);
 
     /**
-     * Returns the index of the given field or -1 if the field does not exist.
+     * Returns the index of the given field 
+     * or -1 if the field does not exist.
+     * Please note that field indices start with 1.
      */
+    
     public int findField(String name);
 
     /**

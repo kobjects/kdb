@@ -123,7 +123,7 @@ public class BibtexTable extends RamTable implements Runnable {
                     for (int i = 0;
                         i < DEFAULT_FIELDS.length;
                         i++) {
-                        if (findField(DEFAULT_FIELDS[i]) == -1)
+                        if (findField(DEFAULT_FIELDS[i]) <= 0)
                             addField(
                                 DEFAULT_FIELDS[i],
                                 DbField.STRING);
@@ -153,13 +153,13 @@ public class BibtexTable extends RamTable implements Runnable {
                         r = n;
                     }
 
-                    if (r[idField] == null) {
-                        r[idField] = generateId();
+                    if (r[idField-1] == null) {
+                        r[idField-1] = generateId();
                     }
 
                     rNew.addElement(r);
 
-                    iNew.put(r[idField], new Integer(i));
+                    iNew.put(r[idField-1], new Integer(i));
                 }
 
                 records = rNew;

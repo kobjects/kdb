@@ -28,19 +28,22 @@ public class BibtexRecord extends RamRecord {
 
 
 	public Object getObject (int index)  {
-		if (index < table.fileIndex) 
+		DbField field = getField(index);
+		if (field.getNumber() < table.fileIndex) 
 			return super.getObject(index);
 
 		try {
 			
 			File file = new File 
 				(table.documentDir, 
-				 values[table.keyIndex]
+				 values[table.keyIndex-1]
 				 +"."
-				 +table.getField(index).getName().substring (0, 3));
+				 +field.getName().substring (0, 3));
 			
 			System.out.println("trying file: "+file);
 			
+			if (!file.exists()) return null;
+
 			return new FileInputStream 
 				(file); 
 		}

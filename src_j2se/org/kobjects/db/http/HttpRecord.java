@@ -33,7 +33,7 @@ public class HttpRecord implements DbResultSet {
         beforeFirst();
         while (hasNext()) {
             next();
-            delete();
+            deleteRow();
         }
     }
 
@@ -46,7 +46,7 @@ public class HttpRecord implements DbResultSet {
         return (b == null) ? false : b.booleanValue();
     }
 
-    public int getInteger(int column) {
+    public int getInt(int column) {
         Integer i = (Integer) getObject(column);
         return (i == null) ? 0 : i.intValue();
     }
@@ -67,8 +67,8 @@ public class HttpRecord implements DbResultSet {
 
 	
 
-    public InputStream getBinary(int column) {
-        return (InputStream) getBinary (column);
+    public InputStream getBinaryStream(int column) {
+        return (InputStream) getBinaryStream (column);
     }
 
 	public long getSize(int column) {
@@ -83,34 +83,34 @@ public class HttpRecord implements DbResultSet {
         return deleted;
     }
 
-    public void setBoolean(int column, boolean value) {
-        setObject(column, new Boolean(value));
+    public void updateBoolean(int column, boolean value) {
+        updateObject(column, new Boolean(value));
     }
 
-    public void setInteger(int column, int value) {
-        setObject(column, new Integer(value));
+    public void updateInteger(int column, int value) {
+        updateObject(column, new Integer(value));
     }
 
-    public void setLong(int column, long value) {
-        setObject(column, new Long(value));
+    public void updateLong(int column, long value) {
+        updateObject(column, new Long(value));
     }
 
-    public void setObject(int column, Object value) {
+    public void updateObject(int column, Object value) {
         values[column] = value;
         modified = true;
     }
 
-    public void setString(int column, String value) {
-        setObject(column, value);
+    public void updateString(int column, String value) {
+        updateObject(column, value);
     }
 
-    public void setBinary(int column, InputStream value) {
+    public void updateBinaryStream(int column, InputStream value) {
         //byte[] bytes = new byte[value.length];
         //System.arraycopy(value, 0, bytes, 0, value.length);
-        setObject(column, value); // was: bytes
+        updateObject(column, value); // was: bytes
     }
 
-    public void insert() throws DbException {
+    public void moveToInsertRow() throws DbException {
         throw new RuntimeException("NYI");
         /*
         		modified = true;
@@ -122,10 +122,10 @@ public class HttpRecord implements DbResultSet {
     }
 
     public void insert(Object[] values) throws DbException {
-        insert();
+        moveToInsertRow();
 
         for (int i = 0; i < values.length; i++) {
-            setObject(i, values[i]);
+            updateObject(i, values[i]);
         }
     }
 
@@ -139,7 +139,7 @@ public class HttpRecord implements DbResultSet {
             next();
     }
 
-    public void refresh() {
+    public void refreshRow() {
         Object[] content = (Object[]) selection.elementAt(current);
         for (int i = 0; i < content.length; i++)
             values[i] = content[i];
@@ -147,7 +147,7 @@ public class HttpRecord implements DbResultSet {
         modified = false;
     }
 
-    public void update() throws DbException {
+    public void updateRow() throws DbException {
         if (!modified)
             return;
 
@@ -190,7 +190,7 @@ public class HttpRecord implements DbResultSet {
 
     }
 
-    public void delete() {
+    public void deleteRow() {
         throw new RuntimeException("NYI");
     }
 
@@ -214,7 +214,7 @@ public class HttpRecord implements DbResultSet {
         if (!hasNext())
             throw new DbException("no next available!");
         current++;
-        refresh();
+        refreshRow();
     }
 
     /** Places the cursor before the first record */
@@ -223,7 +223,7 @@ public class HttpRecord implements DbResultSet {
         current = -1;
     }
 
-    public void dispose() {
+    public void close() {
         //throw new RuntimeException ("NYI");
     }
 }

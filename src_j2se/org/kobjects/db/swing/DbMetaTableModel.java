@@ -58,7 +58,7 @@ public class DbMetaTableModel extends AbstractTableModel {
 
     public Object getValueAt (int row, int column) {
 	//try {
-	    DbField f = table.getField (row);
+	    DbField f = table.getField (row+1);
 	    FieldStatistics fs = stats != null ? stats [row] : null;
 	    switch (column) {
 	    case 0: return ""+f.getNumber ();

@@ -13,7 +13,7 @@ public class RamRecord implements DbResultSet {
 	protected int index; // index in records vector
 	protected RamTable table;
 
-	/** copy of current values */
+	/** (complete) copy of current values */
 	protected Object[] values;
 
 	protected boolean modified;
@@ -26,37 +26,47 @@ public class RamRecord implements DbResultSet {
 		int[] selectedFields) {
 		this.table = table;
 		this.selection = selection;
+
+		if (selectedFields == null) {
+			selectedFields = new int[table.getFieldCount()];
+			for (int i = 1; i <= table.getFieldCount(); i++) 
+				selectedFields[i-1] = i;
+		}
+		
+			System.out.println("first selected field: "+selectedFields[0]);
+		
+
 		this.selectedFields = selectedFields;
+		
 		values = new Object[table.getFieldCount()];
 	}
 
 	public void clear() {
-		values = new Object[getTable().getFieldCount()];
+		values = new Object[table.getFieldCount()];
 		modified = true;
 	}
 
+
+	public int findField(String name) {
+		for (int i = 1; i <= getColumnCount(); i++) {
+			if (getField(i).getName().equals(name)) return i;
+		}
+		return -1;
+	}
+
+	// XXX does deleteRow move the cursor?!??!
+
 	public void deleteAll() throws DbException {
 		beforeFirst();
-		while (hasNext()) {
-			next();
-			delete();
+		while (next()) {
+			deleteRow();
 		}
 	}
 
-
 	protected Object getObjectImpl(int column) {
-		if (selectedFields == null)
-			return values[column];
+		//System.out.println ("column: "+column + " selectedFields[column-1]="+selectedFields[column-1]);
 
-		for (int i = 0; i < selectedFields.length; i++)
-			if (selectedFields[i] == column)
-				return values[column];
-				
-		if (column == table.idField)
-			return values[column];
-
-		throw new IllegalArgumentException(
-			"Field " + column + " not in selection!");				
+		return values[selectedFields[column-1]-1];
 	}
 
 	public Object getObject(int column) {
@@ -64,8 +74,8 @@ public class RamRecord implements DbResultSet {
 		Object value = getObjectImpl(column);
 		
 		return (value instanceof byte[])
-			? new ByteArrayInputStream((byte[]) values[column])
-			: values[column];
+			? new ByteArrayInputStream((byte[]) value)
+			: value;
 
 		// provide always access to id field if available
 	}
@@ -74,7 +84,16 @@ public class RamRecord implements DbResultSet {
 		Boolean b = (Boolean) getObject(column);
 		return (b == null) ? false : b.booleanValue();
 	}
-
+	
+	public DbField getField(int index) {
+		return table.getField(selectedFields[index-1]);
+	}
+	
+	public int getColumnCount() {
+		return selectedFields.length;
+	}
+	
+	
 	public long getSize(int column) {
 		Object value = getObjectImpl(column);
 
@@ -85,7 +104,7 @@ public class RamRecord implements DbResultSet {
 	}
 	
 
-	public int getInteger(int column) {
+	public int getInt(int column) {
 		Integer i = (Integer) getObject(column);
 		return (i == null) ? 0 : i.intValue();
 	}
@@ -108,7 +127,7 @@ public class RamRecord implements DbResultSet {
 		return (o == null) ? null : o.toString();
 	}
 
-	public InputStream getBinary(int column) {
+	public InputStream getBinaryStream(int column) {
 		return (InputStream) getObject(column);
 	}
 
@@ -116,19 +135,19 @@ public class RamRecord implements DbResultSet {
 		return deleted;
 	}
 
-	public void setBoolean(int column, boolean value) {
-		setObject(column, new Boolean(value));
+	public void updateBoolean(int column, boolean value) {
+		updateObject(column, new Boolean(value));
 	}
 
-	public void setInteger(int column, int value) {
-		setObject(column, new Integer(value));
+	public void updateInteger(int column, int value) {
+		updateObject(column, new Integer(value));
 	}
 
-	public void setLong(int column, long value) {
-		setObject(column, new Long(value));
+	public void updateLong(int column, long value) {
+		updateObject(column, new Long(value));
 	}
 
-	public void setObject(int column, Object value) {
+	public void updateObject(int column, Object value) {
 		if (value instanceof InputStream) {
 			try {
 				InputStream is = (InputStream) value;
@@ -144,22 +163,22 @@ public class RamRecord implements DbResultSet {
 				throw new RuntimeException(e.toString());
 			}
 		}
-		values[column] = value;
+		values[selectedFields[column-1]-1] = value;
 		modified = true;
 	}
 
-	public void setString(int column, String value) {
-		setObject(column, value);
+	public void updateString(int column, String value) {
+		updateObject(column, value);
 	}
 
-	public void setBinary(int column, InputStream value) {
+	public void updateBinaryStream(int column, InputStream value) {
 		//byte[] bytes = new byte[value.length];
 		//System.arraycopy(value, 0, bytes, 0, value.length);
 
-		setObject(column, value); // was: bytes
+		updateObject(column, value); // was: bytes
 	}
 
-	public void insert() throws DbException {
+	public void moveToInsertRow() throws DbException {
 		modified = true;
 		index = table.INSERT_ROW;
 
@@ -168,15 +187,15 @@ public class RamRecord implements DbResultSet {
 			values[i] = table.getField(i).getDefault();
 		}
 	}
-
+/*
 	public void insert(Object[] values) throws DbException {
-		insert();
+		moveToInsertRow();
 
 		for (int i = 0; i < values.length; i++) {
-			setObject(i, values[i]);
+			updateObject(i, values[i]);
 		}
 	}
-
+*/
 	public boolean isModified() {
 		return modified;
 	}
@@ -187,33 +206,35 @@ public class RamRecord implements DbResultSet {
 			next();
 	}
 
-	public void refresh() {
+	public void refreshRow() {
 		index = ((Integer) selection.elementAt(current)).intValue();
 		Object[] content = (Object[]) table.records.elementAt(index);
 
 		deleted = content == null;
 
-		for (int i = 0; i < content.length; i++)
+		for (int i = 0; i < content.length; i++){
+		//	System.out.println("values["+i+"]:"+content[i]);
 			values[i] = deleted ? null : content[i];
-
+		}
+		
 		modified = false;
 	}
 
-	public void update() throws DbException {
-
-		/*        Object[] content = null;
+	public void insertRow() throws DbException {
+		if (index != table.INSERT_ROW) 
+			throw new DbException("Not on Insert Row");
 		
-		        if (!deleted) {
-		            content = new Object[values.length];
-		            for (int i = 0; i < values.length; i++)
-		                content[i] = values[i];
-		        } */
-
-		table.update(index, deleted ? null : values);
-
+		table.update(index, deleted ? null : values);		
 	}
 
-	public void delete() {
+	public void updateRow() throws DbException {
+		if (index == table.INSERT_ROW) 
+			throw new DbException("use insertRow for inserting records");
+
+		table.update(index, deleted ? null : values);
+	}
+
+	public void deleteRow() {
 		deleted = true;
 	}
 
@@ -225,15 +246,21 @@ public class RamRecord implements DbResultSet {
 		return table;
 	}
 
-	public boolean hasNext() {
-		return selection != null && current < selection.size() - 1;
+	public boolean isAfterLast() {
+		return current > selection.size() - 1;
+	}
+	
+	public boolean isLast() {
+		return current == selection.size() - 1;
 	}
 
-	public void next() throws DbException {
-		if (!hasNext())
-			throw new DbException("no next available!");
-		index = ((Integer) selection.elementAt(++current)).intValue();
-		refresh();
+	public boolean next() throws DbException {
+		if (isAfterLast()) return false;
+		current++;
+		if (isLast()) return false;
+		index = ((Integer) selection.elementAt(current)).intValue();
+		refreshRow();
+		return true;
 	}
 
 	/** Places the cursor before the first record */
@@ -245,7 +272,7 @@ public class RamRecord implements DbResultSet {
 	/** Dispose does not need to do much in the case of 
 	ramtable */
 
-	public void dispose() {
+	public void close() {
 		//throw new RuntimeException ("NYI");
 	}
 }

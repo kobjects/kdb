@@ -12,16 +12,6 @@ package org.kobjects.db;
 /**
  * To do:
  *
- * - Warum stehen hier alle Zugriffsmethoden quasi für RMS drin. Für andere DBs
- *   wird der Zugriff mit dem Umweg über Objekte doch eher lästig sein. Dito für
- *   absolute etc.
- * - Es fehlen: Get RowCount
- * - Sollte das nicht eher ein Interface sein?
-
-  unklare semantik:
-
-   - darf refresh aufgerufen werden falls modified? -> Cancel
-   - insert: next?!?!, insbes. bei einzelnem record
  */
 
 import java.io.*;
@@ -29,21 +19,24 @@ import java.util.*;
 //import javax.microedition.rms.*;
 
 /**
- * Represents a record in a table. Actually, this class resembles an
- * SQL result set more than a record. However, there are a few
- * differences: The indices always correspond to the column indices of
- * the original table. Also, there are separate next and hasNext
- * methods.  */
+ * A subset of the J2SE SQL Result Set, except from the additional
+ * methods getRowCount, getColumnCount, getField, getTable, and getSize  */
 
 public interface DbResultSet {
 
     public Object getObject(int column);
 
-    public void setObject(int column, Object value);
+    public void updateObject(int column, Object value);
 
     public boolean getBoolean(int column);
 
-    public int getInteger(int column);
+	public int getColumnCount();
+	
+	public DbField getField(int column);
+	
+	public int findField(String name);
+
+    public int getInt(int column);
 
     public long getLong(int column);
 
@@ -56,31 +49,33 @@ public interface DbResultSet {
 
     public String getString(int column);
 
-    public InputStream getBinary(int column);
+    public InputStream getBinaryStream(int column);
 
-    public void setBoolean(int column, boolean value);
+    public void updateBoolean(int column, boolean value);
 
-    public void setInteger(int column, int value);
+    public void updateInteger(int column, int value);
 
-    public void setLong(int column, long value);
+    public void updateLong(int column, long value);
 
-    public void setString(int column, String value);
+    public void updateString(int column, String value);
 
-    public void setBinary(int column, InputStream value);
+    public void updateBinaryStream(int column, InputStream value);
 
-    public void refresh() throws DbException;
+    public void refreshRow() throws DbException;
 
-    public void update() throws DbException;
+    public void updateRow() throws DbException;
 
-    public void insert() throws DbException;
+	public void insertRow() throws DbException;
 
-    public void insert(Object[] values) throws DbException;
+    public void moveToInsertRow() throws DbException;
+
+//    public void insert(Object[] values) throws DbException;
 
     /**
      * Aktuellen Record löschen. Ändert nicht die Position innerhalb des
      * Result Sets. Stattdessen wird einfach nur "deleted" auf true gesetzt.
      */
-    public void delete() throws DbException;
+    public void deleteRow() throws DbException;
 
     /**
      * Alle Records in der Enumeration löschen.
@@ -101,15 +96,19 @@ public interface DbResultSet {
      */
     public void beforeFirst() throws DbException;
 
-    /**
-     * Queries whether the is a next element in this result set.
-     */
-    public boolean hasNext();
+    public boolean isLast();
+
+	public boolean isAfterLast();
 
     /**
      * Proceeds to the next element in this result set, returning its record ID.
      */
-    public void next() throws DbException;
+    public boolean next() throws DbException;
+    
+    /* Maps the given column name to a column index 
+     * 
+    public int findColumn(String name);*/
+    
 
     /**
      * Returns the total number of rows. Influences by update(), insert() and
@@ -130,11 +129,11 @@ public interface DbResultSet {
     /**
      * Throws away the record and all resources it has reserved.
      */
-    public void dispose();
+    public void close();
 
-    /** 
+    /*
      * returns an int array containing the selected field
-     * indices, or null, if all fields are selected */
+     * indices, or null, if all fields are selected 
 
-    public int [] getSelectedFields ();
+    public int [] getSelectedFields (); */
 }

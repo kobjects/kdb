@@ -63,7 +63,7 @@ class JdbcRecord implements DbResultSet {
     /**
      * @see DbRecord#setObject(int, Object)
      */
-    public void setObject(int column, Object value) {
+    public void updateObject(int column, Object value) {
 		throw new RuntimeException ("NYI");
     }
 
@@ -77,7 +77,7 @@ class JdbcRecord implements DbResultSet {
     /**
      * @see DbRecord#getInteger(int)
      */
-    public int getInteger(int column) {
+    public int getInt(int column) {
 		return ((Integer) getObject (column)).intValue();
     }
 
@@ -105,43 +105,43 @@ class JdbcRecord implements DbResultSet {
     /**
      * @see DbRecord#getBinary(int)
      */
-    public InputStream getBinary(int column) {
+    public InputStream getBinaryStream(int column) {
 		return (InputStream) getObject (column);	
     }
 
     /**
      * @see DbRecord#setBoolean(int, boolean)
      */
-    public void setBoolean(int column, boolean value) {
-		setObject (column, new Boolean (value));
+    public void updateBoolean(int column, boolean value) {
+		updateObject (column, new Boolean (value));
     }
 
     /**
      * @see DbRecord#setInteger(int, int)
      */
-    public void setInteger(int column, int value) {
-		setObject (column, new Integer (value));    	
+    public void updateInteger(int column, int value) {
+		updateObject (column, new Integer (value));    	
     }
 
     /**
      * @see DbRecord#setLong(int, long)
      */
-    public void setLong(int column, long value) {
-		setObject (column, new Long (value));
+    public void updateLong(int column, long value) {
+		updateObject (column, new Long (value));
     }
 
     /**
      * @see DbRecord#setString(int, String)
      */
-    public void setString(int column, String value) {
-		setObject (column, value == null ? null : value.toString ());
+    public void updateString(int column, String value) {
+		updateObject (column, value == null ? null : value.toString ());
     }
 
     /**
      * @see DbRecord#setBinary(int, byte[])
      */
-    public void setBinary(int column, InputStream value) {
-		setObject (column, value);
+    public void updateBinaryStream(int column, InputStream value) {
+		updateObject (column, value);
     }
 
 	Object getObj (int column) throws SQLException {
@@ -168,7 +168,7 @@ class JdbcRecord implements DbResultSet {
     /**
      * @see DbRecord#refresh()
      */
-    public void refresh() throws DbException {
+    public void refreshRow() throws DbException {
 		try {
 			for (int i = 0; i < fieldMap.length; i++) {
 				current [i] = getObj (i);
@@ -183,14 +183,14 @@ class JdbcRecord implements DbResultSet {
     /**
      * @see DbRecord#update()
      */
-    public void update() throws DbException {
+    public void updateRow() throws DbException {
 		throw new RuntimeException ("NYI");
     }
 
     /**
      * @see DbRecord#insert()
      */
-    public void insert() throws DbException {
+    public void moveToInsertRow() throws DbException {
 		throw new RuntimeException ("NYI");
     }
 
@@ -204,7 +204,7 @@ class JdbcRecord implements DbResultSet {
     /**
      * @see DbRecord#delete()
      */
-    public void delete() throws DbException {
+    public void deleteRow() throws DbException {
 		throw new RuntimeException ("NYI");
     }
 
@@ -275,7 +275,7 @@ class JdbcRecord implements DbResultSet {
 			if (!resultSet.next())
 				throw new DbException ("Read past eof");
 
-			refresh ();
+			refreshRow ();
 		}
 		catch (SQLException e) {
 			throw new DbException (""+e);
@@ -317,7 +317,7 @@ class JdbcRecord implements DbResultSet {
     public void absolute(int row) throws DbException {
 		try {
 			resultSet.absolute (row);
-			refresh ();
+			refreshRow ();
 		}
 		catch (SQLException e) {
 			throw new DbException ("" + e);
@@ -327,7 +327,7 @@ class JdbcRecord implements DbResultSet {
     /**
      * @see DbRecord#dispose()
      */
-    public void dispose() {
+    public void close() {
     	try {
 			resultSet.close();
 			statement.close ();

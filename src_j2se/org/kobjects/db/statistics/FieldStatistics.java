@@ -25,10 +25,10 @@ public class FieldStatistics {
             stat [i] = new FieldStatistics ();
 
 	record.beforeFirst ();
-        while (record.hasNext ()) {
+        while (!record.isLast () && !record.isAfterLast()) {
 	    record.next ();
             for (int i = 0; i < stat.length; i++) 
-                stat [i].update (record.getObject (i));
+                stat [i].update (record.getObject (i+1));
         }
 
 

@@ -159,7 +159,7 @@ public class DbCondition {
         //System.out.println("evaluate(): " + this.toString() + " of type " + operator);
 
         if (operator < AND) {
-            Object obj =  values[field];
+            Object obj =  values[field-1];
 
             switch (operator) {
                 case LT: {

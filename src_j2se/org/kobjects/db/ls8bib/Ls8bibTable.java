@@ -36,6 +36,11 @@ public class Ls8bibTable extends BibtexTable {
 
 			if (key != null && key.length() > 0) {
 				char c = key.charAt (key.length()-1);
+				
+				Object[] addCopy = new Object[entry.length];
+				System.arraycopy(entry, 0, addCopy, 0, entry.length); 
+
+				// determine the new key locally
 
 				if (c >= '0' && c <= '9') {
 					c = 'a';
@@ -60,7 +65,7 @@ public class Ls8bibTable extends BibtexTable {
 					entry[keyField] = key + c;
 				}
 
-				update.addElement(entry);
+				update.addElement(addCopy);
 			}
 		}
 

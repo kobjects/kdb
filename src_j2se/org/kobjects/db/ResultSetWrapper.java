@@ -1,13 +1,12 @@
 package org.kobjects.db;
 
-import java.io.*;
-import java.util.Map;
-import java.util.Calendar;
+import java.io.InputStream;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
-
-import org.kobjects.db.*;
+import java.util.Calendar;
+import java.util.Map;
 
 // (C) 2002 by Stefan Haustein 
 // Rolandstrasse 27, D-46045 Oberhausen, Germany

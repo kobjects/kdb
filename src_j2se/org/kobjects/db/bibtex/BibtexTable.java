@@ -14,7 +14,7 @@ import java.net.*;
  * id automatically. */
 
 public class BibtexTable extends RamTable {
-
+ 
     class SaveThread extends Thread {
         public void run() {
             while (open) {
@@ -313,7 +313,7 @@ public class BibtexTable extends RamTable {
         return ID_INDEX + 1;
     }
 
-    protected RamRecord getRecords(
+    protected RamResultSet getRecords(
         Vector selected,
         int[] fields) {
         return new BibtexRecord(this, selected, fields);

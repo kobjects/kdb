@@ -112,7 +112,7 @@ public class Mp3Table extends RamTable {
         }
     }
 
-    protected RamRecord getRecords(Vector selected, int[] fields) {
+    protected RamResultSet getRecords(Vector selected, int[] fields) {
         return new Mp3Record(this, selected, fields);
     }
 }

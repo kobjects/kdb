@@ -168,7 +168,7 @@ public class HttpTableSE implements DbTable {
     }
 
     public DbResultSet select(boolean update) throws DbException {
-        return select(null, null, -1, false, update);
+        return select(null, null, null, false, update);
     }
 
 
@@ -188,7 +188,7 @@ public class HttpTableSE implements DbTable {
     public DbResultSet select(
         int[] fields,
         DbCondition condition,
-        int sortfield,
+        int[] sortfield,
         boolean inverse,
         boolean updated)
         throws DbException {
@@ -246,7 +246,7 @@ public class HttpTableSE implements DbTable {
             is.close();
             //connection.close ();
 
-            return new HttpRecord(this, fields, selected);
+            return new HttpResultSet(this, fields, selected);
         }
         catch (IOException e) {
             throw new DbException(e.toString(), e);

@@ -123,13 +123,13 @@ public class RamTable implements DbTable {
     }
 
     public DbResultSet select(boolean updated) throws DbException {
-        return select(null, null, -1, false, updated);
+        return select(null, null, null, false, updated);
     }
 
     public DbResultSet select(
         int[] fields,
         DbCondition condition,
-        int sortfield,
+        int[] sortfield,
         boolean inverse,
         boolean updated)
         throws DbException {
@@ -147,16 +147,16 @@ public class RamTable implements DbTable {
                 selected.addElement(new Integer(i));
         }
 
-        if (sortfield != -1 || updated)
-            throw new RuntimeException("NYI");
+        if (sortfield != null || updated)
+            throw new RuntimeException("support for sorting and updated fields is NYI");
 
 		return getRecords(selected, fields);
  //       return new RamRecord(this, selected, fields);
     }
 
 
-	protected RamRecord getRecords (Vector selected, int [] fields) {
-			return new RamRecord (this, selected, fields);
+	protected RamResultSet getRecords (Vector selected, int [] fields) {
+			return new RamResultSet (this, selected, fields);
 	}
 
 

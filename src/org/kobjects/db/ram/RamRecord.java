@@ -73,17 +73,7 @@ public class RamRecord implements DbResultSet {
         return values[selectedFields[column - 1] - 1];
     }
 
-    public Object getObject(int column) {
-
-        Object value = getObjectImpl(column);
-
-        return (value instanceof byte[])
-            ? new ByteArrayInputStream((byte[]) value)
-            : value;
-
-        // provide always access to id field if available
-    }
-
+ 
     public boolean getBoolean(int column) {
         Boolean b = (Boolean) getObject(column);
         return (b == null) ? false : b.booleanValue();
@@ -130,10 +120,6 @@ public class RamRecord implements DbResultSet {
         return (o == null) ? null : o.toString();
     }
 
-    public InputStream getBinaryStream(int column) {
-        return (InputStream) getObject(column);
-    }
-
     public boolean isDeleted() {
         return deleted;
     }
@@ -142,7 +128,7 @@ public class RamRecord implements DbResultSet {
         updateObject(column, new Boolean(value));
     }
 
-    public void updateInteger(int column, int value) {
+    public void updateInt(int column, int value) {
         updateObject(column, new Integer(value));
     }
 
@@ -150,43 +136,12 @@ public class RamRecord implements DbResultSet {
         updateObject(column, new Long(value));
     }
 
-    public void updateObject(int column, Object value) {
-        if (value instanceof InputStream) {
-            try {
-                InputStream is = (InputStream) value;
-                ByteArrayOutputStream bos =
-                    new ByteArrayOutputStream();
-                byte[] buf = new byte[128];
-                while (true) {
-                    int cnt = is.read(buf);
-                    if (cnt == -1)
-                        break;
-                    bos.write(buf, 0, cnt);
-                }
-                value = bos.toByteArray();
-            }
-            catch (IOException e) {
-                throw new RuntimeException(e.toString());
-            }
-        }
-        if (column < 1 || column > selectedFields.length) 
-        	throw new IndexOutOfBoundsException ("colum "+column+ " out of range 1.."+selectedFields.length);
-        values[selectedFields[column - 1] - 1] = value;
-        modified = true;
-    }
-
+ 
     public void updateString(int column, String value) {
         updateObject(column, value);
     }
 
-    public void updateBinaryStream(
-        int column,
-        InputStream value) {
-        //byte[] bytes = new byte[value.length];
-        //System.arraycopy(value, 0, bytes, 0, value.length);
-
-        updateObject(column, value); // was: bytes
-    }
+  
 
     public void moveToInsertRow() throws DbException {
         modified = true;
@@ -295,4 +250,80 @@ public class RamRecord implements DbResultSet {
     public void close() {
         //throw new RuntimeException ("NYI");
     }
+    
+    
+    
+
+
+	public void updateObject(int column, Object value) {
+		if (column < 1 || column > selectedFields.length)
+			throw new IndexOutOfBoundsException ("colum "+column+ " out of range 1.."+selectedFields.length);
+
+		values[selectedFields[column - 1] - 1] = value;
+		modified = true;
+	}
+
+	/**
+		 * @see org.kobjects.db.DbResultSet#getBytes(int)
+		 */
+
+	public byte[] getBytes(int column) {
+		return (byte[]) getObject(column);
+	}
+
+
+
+	public InputStream getBinaryStream(int column) {
+		return new ByteArrayInputStream((byte[]) getObject(column));
+	}
+
+	public boolean isKeptUpdated() {
+		throw new RuntimeException("NYI");
+	}
+
+	public boolean isSorted() {
+		throw new RuntimeException("NYI");
+	}
+
+
+	public void updateBinaryStream(int column, InputStream value) {
+		//byte[] bytes = new byte[value.length];
+		//System.arraycopy(value, 0, bytes, 0, value.length);
+
+		try {
+			InputStream is = (InputStream) value;
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			byte[] buf = new byte[128];
+			while (true) {
+				int cnt = is.read(buf);
+				if (cnt == -1)
+					break;
+				bos.write(buf, 0, cnt);
+			}
+			updateObject(column, bos.toByteArray()); // was: bytes
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e.toString());
+		}
+	}
+
+	/**
+	 * @see org.kobjects.db.DbResultSet#updateBytes(int, byte[])
+	 */
+	public void updateBytes(int column, byte[] data) {
+		updateObject(column, data);
+	}
+
+
+	public Object getObject(int column) {
+		return values[selectedFields[column - 1] - 1];
+
+		/*
+			return value = getObjectImpl(column);
+
+			return (value instanceof byte[])
+				? new ByteArrayInputStream((byte[]) value)
+				: value; */
+	}
+
 }

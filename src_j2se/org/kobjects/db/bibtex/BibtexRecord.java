@@ -16,7 +16,7 @@ import org.kobjects.db.ram.*;
 /**
  * @author Stefan Haustein */
 
-public class BibtexRecord extends RamRecord {
+public class BibtexRecord extends RamResultSet {
 
 	BibtexTable table;
 
@@ -36,7 +36,7 @@ public class BibtexRecord extends RamRecord {
 			
 			File file = new File 
 				(table.documentDir, 
-				 values[table.KEY_INDEX]
+				 values[BibtexTable.KEY_INDEX]
 				 +"."
 				 +field.getName().substring (0, 3));
 			

@@ -63,7 +63,7 @@ abstract class AbstractRecordNode extends AbstractNode {
 	    		condition = new DbSqlParser (dbTable).parse (query);
 	    		condition.setTable (dbTable);
 			}
-			record = dbTable.select (fields, condition, order, inverse, false);
+			record = dbTable.select (fields, condition, new int[] {order}, inverse, false);
 			record.getRowCount ();
 		}
 		catch (DbException e) {

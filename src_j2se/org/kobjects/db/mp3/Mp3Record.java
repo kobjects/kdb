@@ -13,7 +13,7 @@ import java.util.*;
 import java.io.*;
 import org.kobjects.db.ram.*;
 
-public class Mp3Record extends RamRecord {
+public class Mp3Record extends RamResultSet {
 
 	Mp3Record(RamTable table, Vector selected, int[] fields) {
 		super(table, selected, fields);

@@ -243,13 +243,13 @@ public class JdbcTable implements DbTable {
     }
 
     public DbResultSet select(boolean updated) throws DbException {
-        return select(null, null, -1, false, updated);
+        return select(null, null, null, false, updated);
     }
 
     public DbResultSet select(
         int[] fields,
         DbCondition condition,
-        int sortfield,
+        int[] sortfield,
         boolean inverse,
         boolean updated)
         throws DbException {

@@ -4,6 +4,7 @@ import java.util.Vector;
 import java.io.*;
 import java.net.*;
 import org.kobjects.db.*;
+import org.kobjects.util.*;
 
 public class HttpRecord implements DbRecord {
 
@@ -161,7 +162,10 @@ public class HttpRecord implements DbRecord {
             for (int i = 0; i < content.length; i++) {
                 if ((content[i] != values[i])
                     && (content[i] == null || !content[i].equals(values[i]))) {
-                    w.write (table.getField(i).getName()+"="+ values[i]+"\r\n");
+                    w.write (table.getField(i).getName()+"=");
+                    if (values[i] != null) 
+                    	w.write(Csv.encode(values[i].toString(), (char)0));
+                    w.write ("\r\n");
                     content[i] = values[i];
                 }
             }

@@ -41,6 +41,9 @@ public class ArffTable extends RamTable {
 		}
 	}
 	
+    public String getName () {
+	return name;
+    }
 	
 	public static void main (String [] args) throws DbException {
 		DbTable table = new ArffTable 

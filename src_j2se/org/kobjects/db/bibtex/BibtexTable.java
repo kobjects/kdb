@@ -268,6 +268,10 @@ public class BibtexTable extends RamTable implements Runnable {
         super.close();
     }
 
+    protected RamRecord getRecords(Vector selected, int[] fields) {
+        return new BibtexRecord(this, selected, fields);
+    }
+
     /*
     	public static void main(String argv[]) throws DbException {
     

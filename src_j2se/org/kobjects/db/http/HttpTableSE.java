@@ -71,7 +71,7 @@ public class HttpTableSE implements DbTable {
                     System.out.println ("part "+i+": "+f[i]);
                 }
                 
-                addField(f[0], Field.STRING);
+                addField(f[0], DbField.STRING);
                 // 1 type
                 // 2 len
                 // 3 dec

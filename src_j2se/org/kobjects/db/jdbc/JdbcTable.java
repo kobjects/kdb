@@ -310,9 +310,9 @@ public class JdbcTable implements DbTable {
             buf.append(f.getName());
             buf.append(' ');
             switch (f.getType()) {
-                case Field.DOUBLE :
-                case Field.INTEGER :
-                case Field.LONG :
+                case DbField.DOUBLE :
+                case DbField.INTEGER :
+                case DbField.LONG :
                     if (f.getConstraints() == 0)
                         buf.append(
                             "NUMBER (" + f.getMaxSize() + ")");
@@ -325,7 +325,7 @@ public class JdbcTable implements DbTable {
                                 + ")");
                     break;
 
-                case Field.STRING :
+                case DbField.STRING :
                     buf.append(
                         "VARCHAR (" + f.getMaxSize() + ")");
                     break;

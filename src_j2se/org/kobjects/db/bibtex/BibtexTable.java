@@ -11,8 +11,17 @@ public class BibtexTable extends RamTable {
 
     String fileName;
     
+    
+    public BibtexTable () {
+    }
 
-    public void init (String connector) {
+
+    public BibtexTable (String filename) {
+	connect (filename);
+    }
+
+
+    public void connect (String connector) {
         
         fileName = connector;
     }
@@ -58,7 +67,25 @@ public class BibtexTable extends RamTable {
             throw new DbException (e.toString ());
         }
     }
+
+
+    public static void main (String argv []) throws DbException {
+	
+	DbTable table = new BibtexTable (argv [0]);
+
+	table.open ();
+
+	DbRecord r = table.select (false);
+	
+	while (r.hasNextElement ()) {
+	    r.nextElement ();
+
+	    System.out.println (r.getId ());
+	}
+    }
+
 } 
+
 
 
 

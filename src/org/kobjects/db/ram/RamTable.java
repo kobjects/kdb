@@ -122,12 +122,14 @@ public class RamTable implements DbTable {
     }
 
 
-    public DbRecord select (boolean updated) {
+    public DbRecord select (boolean updated) throws DbException {
         return select (null, -1, false, updated);
     }
 
 
-    public DbRecord select (DbCondition condition, int sortfield, boolean inverse, boolean updated) {
+    public DbRecord select (DbCondition condition, int sortfield, boolean inverse, boolean updated) throws DbException {
+
+	checkOpen (true);
 
 	Vector selected = new Vector ();
 

@@ -90,11 +90,6 @@ public interface DbRecord {
     public DbTable getTable();
 
     /**
-     * Returns the ID of the current record.
-     */
-    public Object getId();
-
-    /**
      * Resets the iterator before the first row.
      */
     public void beforeFirst() throws DbException;

@@ -109,8 +109,7 @@ public class DbCondition {
     /**
      * Creates a new Condition node for a relation between a field (given by its
      * number) and a value. The operator must be one of LT, GT, LE, GE, EQ, NE,
-     * or EQIC. The field number may be -1, which means that the record ID is
-     * compared to the given values.
+     * or EQIC. 
      */
     public DbCondition(int operator, int field, Object value) throws DbException {
         if ((operator < LT) || (operator > EQ_TEXT)) {
@@ -156,11 +155,11 @@ public class DbCondition {
     /**
      * Evaluates this Condition for the given record.
      */
-    public boolean evaluate(Object id, Object[] values) {
+    public boolean evaluate(Object[] values) {
         System.out.println("evaluate(): " + this.toString() + " of type " + operator);
 
         if (operator < AND) {
-            Object obj = (field == -1) ? id : values[field];
+            Object obj =  values[field];
 
             switch (operator) {
                 case LT: {
@@ -196,7 +195,7 @@ public class DbCondition {
             switch (operator) {
                 case AND: {
                     for (int i = 0; i < children.length; i++) {
-                        if (!children[i].evaluate(id, values)) return false;
+                        if (!children[i].evaluate(values)) return false;
                     }
 
                     return true;
@@ -204,18 +203,18 @@ public class DbCondition {
 
                 case OR: {
                     for (int i = 0; i < children.length; i++) {
-                        if (children[i].evaluate(id, values)) return true;
+                        if (children[i].evaluate(values)) return true;
                     }
 
                     return false;
                 }
 
                 case XOR: {
-                    return children[0].evaluate(id, values) ^ children[1].evaluate(id, values);
+                    return children[0].evaluate(values) ^ children[1].evaluate(values);
                 }
 
                 case NOT: {
-                    return !children[0].evaluate(id, values);
+                    return !children[0].evaluate(values);
                 }
             }
         }

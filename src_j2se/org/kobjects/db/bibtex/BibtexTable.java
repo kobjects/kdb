@@ -33,7 +33,7 @@ public class BibtexTable extends RamTable {
 
 				}
 
-				setIdFields(new int[] { 1 });
+				setIdField(1);
 
 				// ensure equal record sizes
 
@@ -48,7 +48,7 @@ public class BibtexTable extends RamTable {
 					}
 
 					records.addElement(r);
-					index.put(getId(i), new Integer(i));
+					index.put(r[1], new Integer(i));
 				}
 			} catch (IOException e) {
 				throw new DbException(e.toString());
@@ -104,7 +104,7 @@ public class BibtexTable extends RamTable {
 	super.close ();
     }
 
-
+/*
 	public static void main(String argv[]) throws DbException {
 
 		DbTable table = DbManager.connect("bibtex:" + argv[0]);
@@ -119,7 +119,7 @@ public class BibtexTable extends RamTable {
 			System.out.println(r.getId());
 		}
 	}
-
+*/
 }
 
 

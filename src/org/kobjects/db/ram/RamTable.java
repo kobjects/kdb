@@ -5,148 +5,128 @@ import org.kobjects.db.*;
 
 public class RamTable implements DbTable {
 
-	// deleted records are marked by null values
+    // deleted records are marked by null values
 
-	protected Vector fields = new Vector();
-	protected Vector records = new Vector();
-	protected Hashtable index;
-	protected boolean open;
-	protected boolean exists;
+    protected Vector fields = new Vector();
+    protected Vector records = new Vector();
+    protected Hashtable index;
+    protected boolean open;
+    protected boolean exists;
     protected boolean modified;
-	protected int[] idFields;
+    protected int idField = -1;
 
-	public void connect(String connector) throws DbException {
-	}
+    public void connect(String connector) throws DbException {
+    }
 
-	public int findField(String name) {
-		int cnt = getFieldCount();
-		for (int i = 0; i < cnt; i++)
-			if (getField(i).getName().equals(name))
-				return i;
+    public int findField(String name) {
+        int cnt = getFieldCount();
+        for (int i = 0; i < cnt; i++)
+            if (getField(i).getName().equals(name))
+                return i;
 
-		return -1;
-	}
+        return -1;
+    }
 
-	public DbField addField(String name, int type) {
-		int i = findField(name);
-		if (i != -1)
-			return getField(i);
+    public DbField addField(String name, int type) {
+        int i = findField(name);
+        if (i != -1)
+            return getField(i);
 
-		DbField f = new DbField(this, fields.size(), name, type);
-		fields.addElement(f);
-		return f;
-	}
+        DbField f = new DbField(this, fields.size(), name, type);
+        fields.addElement(f);
+        return f;
+    }
 
-	public boolean isOpen() {
-		return open;
-	}
+    public boolean isOpen() {
+        return open;
+    }
 
-	protected void checkOpen(boolean required) throws DbException {
-		if (open != required)
-			throw new DbException("DB must " + (required ? "" : "not ") + "be open");
-	}
+    protected void checkOpen(boolean required)
+        throws DbException {
+        if (open != required)
+            throw new DbException(
+                "DB must "
+                    + (required ? "" : "not ")
+                    + "be open");
+    }
 
-	protected Object getId(int index) {
-		if (idFields == null)
-			return new Integer(index);
-		Object[] record = (Object[]) records.elementAt(index);
-		StringBuffer buf = new StringBuffer();
-		for (int i = 0; i < idFields.length; i++)
-			buf.append(record[idFields[i]].toString());
+    public String getName() {
+        return "RamTable";
+    }
 
-		return buf.toString();
-	}
+    public void open() throws DbException {
+        if (!exists)
+            throw new DbException("Db does not exist!");
+        checkOpen(false);
+        open = true;
+    }
 
-	public String getName() {
-		return "RamTable";
-	}
+    public void create() throws DbException {
+        checkOpen(false);
+        exists = true;
+    }
 
-	public void open() throws DbException {
-		if (!exists)
-			throw new DbException("Db does not exist!");
-		checkOpen(false);
-		open = true;
-	}
+    public void close() throws DbException {
+        open = false;
+        records = null;
+    }
 
-	public void create() throws DbException {
-		checkOpen(false);
-		exists = true;
-	}
+    public void delete() throws DbException {
+        close();
+    }
 
-	public void close() throws DbException {
-		open = false;
-		records = null;
-	}
+    public boolean exists() {
+        return !open;
+    }
 
-	public void delete() throws DbException {
-		close();
-	}
+    public int getIdField() {
+        return idField;
+    }
 
-	public void deleteRecord(Object id) throws DbException {
-		select(id).delete();
-	}
+    public DbField getField(int index) {
+        return (DbField) fields.elementAt(index);
+    }
 
-	public boolean exists() {
-		return !open;
-	}
+    public int getFieldCount() {
+        return fields.size();
+    }
 
-	public DbField getField(int index) {
-		return (DbField) fields.elementAt(index);
-	}
+    public DbRecord select(boolean updated) throws DbException {
+        return select(null, null, -1, false, updated);
+    }
 
-	public int getFieldCount() {
-		return fields.size();
-	}
+    public DbRecord select(
+        int[] fields,
+        DbCondition condition,
+        int sortfield,
+        boolean inverse,
+        boolean updated)
+        throws DbException {
 
-	public DbRecord select(Object id) {
-		Vector selected = new Vector();
+        checkOpen(true);
 
-		if (idFields != null)
-			id = index.get (id);
-			
-		if (id != null && ((Integer) id).intValue () < records.size ())
-			selected.addElement(id);
+        Vector selected = new Vector();
 
-		System.out.println ("select for id "+id+" size: "+selected.size ());
+        for (int i = 0; i < records.size(); i++) {
 
-		return new RamRecord(this, selected, null);
-	}
+            Object[] r = (Object[]) records.elementAt(i);
 
-	public DbRecord select(boolean updated) throws DbException {
-		return select(null, null, -1, false, updated);
-	}
+            if (r != null
+                && (condition == null || condition.evaluate(r)))
+                selected.addElement(new Integer(i));
+        }
 
-	public DbRecord select(
-			       int [] fields,			       
-		DbCondition condition,
-		int sortfield,
-		boolean inverse,
-		boolean updated)
-		throws DbException {
+        if (sortfield != -1 || updated)
+            throw new RuntimeException("NYI");
 
-		checkOpen(true);
+        return new RamRecord(this, selected, fields);
+    }
 
-		Vector selected = new Vector();
+    public void setIdField(int idField) throws DbException {
 
-		for (int i = 0; i < records.size(); i++) {
-
-			Object[] r = (Object[]) records.elementAt(i);
-
-			if (r != null && (condition == null || condition.evaluate(getId(i), r)))
-				selected.addElement(new Integer(i));
-		}
-
-		if (sortfield != -1 || updated)
-			throw new RuntimeException("NYI");
-
-		return new RamRecord(this, selected, fields);
-	}
-
-	public void setIdFields(int[] idFields) throws DbException {
-
-		checkOpen(false);
-		this.idFields = idFields;
-		index = new Hashtable();
-	}
+        checkOpen(false);
+        this.idField = idField;
+        index = new Hashtable();
+    }
 
 }

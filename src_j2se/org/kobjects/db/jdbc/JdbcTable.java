@@ -10,7 +10,6 @@ public class JdbcTable implements DbTable {
     String tableName;
     boolean exists;
     boolean open;
-    int[] idFields;
     Connection connection;
     PreparedStatement insertStatement;
     boolean ownConnection;
@@ -111,7 +110,7 @@ public class JdbcTable implements DbTable {
                 // meta.getColumnName (i),
                 int type;
                 switch (meta.getColumnType(i)) {
-                	case Types.CHAR:
+                    case Types.CHAR :
                     case Types.VARCHAR :
                     case Types.LONGVARCHAR :
                         type = DbField.STRING;
@@ -120,11 +119,15 @@ public class JdbcTable implements DbTable {
                         type = DbField.INTEGER;
                         break;
                     case Types.NUMERIC :
-						if (meta.getPrecision(i) <= 16 && meta.getScale (i) == 0) 
-							type = meta.getPrecision(i) <= 8 ? DbField.INTEGER :DbField.LONG;
-						else
-							type = DbField.DOUBLE;
-						break;						                    	
+                        if (meta.getPrecision(i) <= 16
+                            && meta.getScale(i) == 0)
+                            type =
+                                meta.getPrecision(i) <= 8
+                                    ? DbField.INTEGER
+                                    : DbField.LONG;
+                        else
+                            type = DbField.DOUBLE;
+                        break;
                     case Types.REAL :
                         type = DbField.DOUBLE;
                         break;
@@ -180,13 +183,17 @@ public class JdbcTable implements DbTable {
                     + "be open");
     }
 
+    public int getIdField() {
+        return -1;
+    }
+
     public String getName() {
         return tableName;
     }
 
-	public String toString () {
-		return tableName;	
-	}
+    public String toString() {
+        return tableName;
+    }
 
     public void open() throws DbException {
         if (!exists)
@@ -223,10 +230,7 @@ public class JdbcTable implements DbTable {
         }
     }
 
-    public void deleteRecord(Object id) throws DbException {
-        select(id).delete();
-    }
-
+  
     public boolean exists() {
         return exists;
     }
@@ -239,11 +243,7 @@ public class JdbcTable implements DbTable {
         return fields.size();
     }
 
-    public DbRecord select(Object id) {
-
-        throw new RuntimeException("NYI");
-    }
-
+   
     public DbRecord select(boolean updated) throws DbException {
         return select(null, null, -1, false, updated);
     }
@@ -338,7 +338,7 @@ public class JdbcTable implements DbTable {
         buf.append(")");
 
         try {
-            connection.createStatement ().execute(buf.toString());
+            connection.createStatement().execute(buf.toString());
             exists = true;
         }
         catch (SQLException e) {

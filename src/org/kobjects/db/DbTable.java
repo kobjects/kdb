@@ -54,6 +54,13 @@ public interface DbTable {
     public void create() throws DbException;
 
     /**
+     * Returns the index of the Id field of this table; -1 if there is no 
+     * id field. */
+    
+    public int getIdField ();
+
+
+    /**
      * Opens the table. Must throw an exception if the table is already open or
      * some other error occurs.
      */
@@ -91,12 +98,7 @@ public interface DbTable {
      */
     public DbRecord select(boolean updated) throws DbException;
 
-    /**
-     * Selects the record that bears the given ID. This is a convenience
-     * method. The usual rules for the "big" select() apply.
-     */
-    public DbRecord select(Object id) throws DbException;
-
+ 
     /**
      * Select the given field indices from all records for which the
      * given condition evaluates to true. If the given orderField is a
